@@ -1,4 +1,4 @@
-import { scrapePage } from "../services/firecrawlService.js";
+import { scrapePage } from "../services/fireCrawlService.js";
 import {
   findCreatorsFromUrls,
   discoverCreatorUrls,
@@ -39,9 +39,14 @@ export async function findCreators(req, res) {
 
     const results = await findCreatorsFromUrls(urls);
 
+    const swedish = results.filter((creator) => creator.likelySwedish);
+    const nonSwedish = results.filter((creator) => !creator.likelySwedish);
+
     res.json({
       success: true,
-      count: results.length,
+      totalCount: results.length,
+      swedishCount: swedish.length,
+      nonSwedishCount: nonSwedish.length,
       creators: results,
     });
   } catch (error) {

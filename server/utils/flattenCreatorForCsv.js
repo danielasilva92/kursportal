@@ -14,5 +14,7 @@ export function flattenCreatorForCsv(creator) {
     language: creator.language || "",
     title: creator.title || "",
     description: creator.description || "",
+    likelySwedish: creator.likelySwedish ?? "",
+    leadScore: creator.leadScore ?? "",
   };
 }

@@ -8,6 +8,13 @@ export function detectLikelyCategory(text = "") {
   if (lower.includes("excel") || lower.includes("office")) return "Produktivitet";
   if (lower.includes("programmering") || lower.includes("kod")) return "Tech";
   if (lower.includes("hälsa") || lower.includes("träning")) return "Hälsa";
+  if (lower.includes("business")) return "Business";
+  if (lower.includes("coaching")) return "Coaching";
+  if (lower.includes("yoga")) return "Hälsa";
+  if (lower.includes("coach")) return "Coaching";
+if (lower.includes("developer")) return "Tech";
+if (lower.includes("entreprenör")) return "Business";
+if (lower.includes("företagande")) return "Business";
 
   return "Okänd";
 }

@@ -1,4 +1,4 @@
-import { scrapePage } from "./firecrawlService.js";
+import { scrapePage } from "./fireCrawlService.js";
 import { detectPlatform } from "../utils/detectPlatform.js";
 import { extractCreatorData } from "../utils/extractCreatorData.js";
 
@@ -18,6 +18,9 @@ export async function findCreatorsFromUrls(urls) {
         metadata,
       });
 
+      console.log("URL:", url);
+      console.log("Creator:", creator);
+
       if (creator) {
         results.push(creator);
       }
@@ -30,6 +33,8 @@ export async function findCreatorsFromUrls(urls) {
       });
     }
   }
+
+  results.sort((a, b) => (b.leadScore || 0) - (a.leadScore || 0));
 
   return results;
 }
