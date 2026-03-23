@@ -2,6 +2,7 @@ import { scrapePage } from "../services/fireCrawlService.js";
 import {
   findCreatorsFromUrls,
   discoverCreatorUrls,
+  runDiscoveryPipeline,
 } from "../services/creatorService.js";
 import { convertCreatorsToCsv } from "../services/exportService.js";
 
@@ -93,6 +94,33 @@ export async function exportCsv(req, res) {
     console.error("export-csv error:", error);
     res.status(500).json({
       error: "CSV export failed",
+      details: error?.message || "Unknown error",
+    });
+  }
+}
+
+export async function runPipeline(req, res) {
+  try {
+    const limit = Number(req.query.limit) || 20;
+
+    const result = await runDiscoveryPipeline(limit);
+
+    const swedish = result.creators.filter((creator) => creator.likelySwedish);
+    const nonSwedish = result.creators.filter((creator) => !creator.likelySwedish);
+
+    res.json({
+      success: true,
+      discoveredCount: result.discoveredCount,
+      selectedCount: result.selectedCount,
+      creatorsCount: result.creatorsCount,
+      swedishCount: swedish.length,
+      nonSwedishCount: nonSwedish.length,
+      creators: result.creators,
+    });
+  } catch (error) {
+    console.error("run-pipeline error:", error);
+    res.status(500).json({
+      error: "Pipeline failed",
       details: error?.message || "Unknown error",
     });
   }
