@@ -16,11 +16,20 @@ function buildResult(url, html) {
     ""
   );
 
+
+const links = [];
+
+$("a").each((i, el) => {
+  const href = $(el).attr("href");
+  if (href && href.startsWith("http")) {
+    links.push(href);
+  }
+});
   const bodyText = cleanText($("body").text() || "");
 
-  return {
-    html,
-    markdown: bodyText,
+return {
+  html,
+  markdown: bodyText + "\n" + links.join("\n"),
     metadata: {
       title,
       description,
