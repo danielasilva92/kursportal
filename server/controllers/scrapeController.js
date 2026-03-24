@@ -5,6 +5,7 @@ import {
   runDiscoveryPipeline,
 } from "../services/creatorService.js";
 import { convertCreatorsToCsv } from "../services/exportService.js";
+import { scrapePage } from "../services/scrapeService.js";
 
 export async function scrapeUrl(req, res) {
   try {

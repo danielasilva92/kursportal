@@ -34,6 +34,7 @@ return {
       title,
       description,
       sourceURL: url,
+    language: $("html").attr("lang") || null,
     },
   };
 }

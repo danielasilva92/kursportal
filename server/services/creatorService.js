@@ -1,6 +1,6 @@
 import { detectPlatform } from "../utils/detectPlatform.js";
 import { extractCreatorData } from "../utils/extractCreatorData.js";
-import { scrapePage } from "./fireCrawlService.js";
+import { scrapePage } from "./scrapeService.js";
 import { addToQueue, getNextUrl, markVisited, hasMoreUrls } from "./queue.js";
 
 const AGGREGATOR_SEED_URLS = [
@@ -174,12 +174,44 @@ export async function discoverCreatorUrls() {
 export async function findCreatorsFromUrls(urls) {
   const results = [];
 
+  for (const url of urls) {
+    try {
+      console.log("Scraping:", url);
+      const scraped = await scrapePage(url);
+      const markdown = scraped.markdown || "";
+      const metadata = scraped.metadata || {};
+      const creator = extractCreatorData({ url, markdown, metadata });
+      if (creator) results.push(creator);
+    } catch (error) {
+      results.push({
+        url,
+        platform: detectPlatform(url),
+        dataSource: detectPlatform(url),
+        error: error?.message || "Failed to scrape",
+        likelySwedish: false,
+        leadScore: 0,
+      });
+    }
+  }
 
+  results.sort((a, b) => (b.leadScore || 0) - (a.leadScore || 0));
 
- async function runCrawler() {
+  const seen = new Set();
+
+  const uniqueResults = results.filter((creator) => {
+    const key = creator.courseUrl || creator.url;
+    if (!key) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return uniqueResults;
+}
+
+export async function runCrawler() {
   const results = [];
 
-  
   AGGREGATOR_SEED_URLS.forEach(addToQueue);
   KNOWN_PLATFORM_SEED_URLS.forEach(addToQueue);
 
@@ -196,7 +228,6 @@ export async function findCreatorsFromUrls(urls) {
       const scraped = await scrapePage(url);
       const markdown = scraped.markdown || "";
 
-    
       const creator = extractCreatorData({
         url,
         markdown,
@@ -207,7 +238,6 @@ export async function findCreatorsFromUrls(urls) {
         results.push(creator);
       }
 
-     
       const foundUrls = extractAllUrls(markdown);
 
       foundUrls
@@ -219,26 +249,11 @@ export async function findCreatorsFromUrls(urls) {
       iterations++;
 
     } catch (err) {
-      console.log("Error:", url);
+      console.error("Crawl error:", url, err.message);
     }
   }
 
   return results;
-}
-
-  results.sort((a, b) => (b.leadScore || 0) - (a.leadScore || 0));
-
-  const seen = new Set();
-
-  const uniqueResults = results.filter((creator) => {
-    const key = creator.courseUrl || creator.url;
-    if (!key) return true;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-
-  return uniqueResults;
 }
 
 export async function runDiscoveryPipeline(limit = 20) {
