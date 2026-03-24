@@ -94,6 +94,10 @@ function isIgnored(url = "") {
     lower.includes("cloudinary.com") ||
     lower.includes("translate.google.com") ||
     lower.includes("cdn.") ||
+    lower.includes("/podcasts/") ||
+lower.includes("/feed") ||
+lower.includes("/podcasts/") ||
+lower.includes("/feed") ||
     /\.(jpg|jpeg|png|webp|gif|svg|pdf|zip)(\?|$)/i.test(lower)
   );
 }

@@ -16,5 +16,6 @@ export function flattenCreatorForCsv(creator) {
     description: creator.description || "",
     likelySwedish: creator.likelySwedish ?? "",
     leadScore: creator.leadScore ?? "",
+    courseName: creator.courseName || "",
   };
 }

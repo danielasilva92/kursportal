@@ -11,6 +11,9 @@ const AGGREGATOR_TITLE_PATTERNS = [
 const JUNK_NAME_PATTERNS = [
   /^(hem|home|start|index|kurs|kurser|utbildning|utbildningar|om oss|kontakt|page \d+)$/i,
   /^(online courses?|all courses?|course catalog|browse courses?)$/i,
+  /^-?\s*den kompletta guiden$/i,
+  /^(hem|home)$/i,/^(kursen)$/i,/^(webbkurs|onlinekurs|kurs)$/i,/^(kursen)$/i,
+/^(webbkurs|onlinekurs|kurs)$/i,
 ];
 
 function isAggregatorPage(title = "", url = "") {
@@ -67,13 +70,10 @@ function extractCreatorNameFromMarkdown(markdown = "") {
 
 function getBestCreatorName(metadata = {}, markdown = "", url = "") {
   const title = (metadata.title || "").trim();
+  const { right } = splitTitleParts(title);
 
-  if (title && !isJunkName(title) && !isAggregatorPage(title, url)) {
-    const cleanTitle = title
-      .replace(/\s*[\|—\-]\s*.{0,40}$/, "")
-      .replace(/\s*(teachable|kajabi|thinkific|podia|learnworlds)\s*/gi, "")
-      .trim();
-    if (cleanTitle.length > 2) return cleanTitle;
+  if (right && !isJunkName(right) && right.length > 2) {
+    return right;
   }
 
   const fromMarkdown = extractCreatorNameFromMarkdown(markdown);
@@ -180,21 +180,57 @@ function canonicalizeUrl(url = "") {
   }
 }
 
+function splitTitleParts(title = "") {
+  if (!title || !title.includes("|")) {
+    return {
+      left: title.trim(),
+      right: "",
+    };
+  }
+
+  const parts = title.split("|").map((part) => part.trim()).filter(Boolean);
+
+  return {
+    left: parts[0] || "",
+    right: parts[1] || "",
+  };
+}
+
+function getBestCourseName(metadata = {}, markdown = "") {
+  const title = (metadata.title || "").trim();
+  const { left } = splitTitleParts(title);
+
+  if (left && !isJunkName(left) && left.length > 2) {
+    return left;
+  }
+
+  const firstHeadingMatch = markdown.match(/^#\s+(.+)$/m);
+  if (firstHeadingMatch && firstHeadingMatch[1]) {
+    const heading = firstHeadingMatch[1].trim();
+    if (!isJunkName(heading)) {
+      return heading;
+    }
+  }
+
+  return null;
+}
+
 export function extractCreatorData({ url, markdown, metadata }) {
   const title = metadata.title || "";
   const description = metadata.description || "";
   const combinedText = `${title}\n${description}\n${markdown}`.trim();
 
 const cleanUrl = canonicalizeUrl(url);
-  const platform = detectPlatform(url);
-const isAggregator = isAggregatorPage(title, url);
+  const platform = detectPlatform(cleanUrl);
+const isAggregator = isAggregatorPage(title, cleanUrl);
 
   const emails = extractEmails(combinedText);
   const prices = extractPrices(combinedText);
   const socials = extractSocials(combinedText);
   const likelySwedish = isSwedish(combinedText, cleanUrl);
 const creatorName = getBestCreatorName(metadata, markdown, cleanUrl);
-  const courseCount = extractCourseCount(markdown);
+const courseName = getBestCourseName(metadata, markdown);
+const courseCount = extractCourseCount(markdown);
   const followerCount = extractFollowerCount(combinedText);
 
   const leadScore = calculateLeadScore({
@@ -203,13 +239,14 @@ const creatorName = getBestCreatorName(metadata, markdown, cleanUrl);
 
   return {
     creatorName,
+    courseName,
     platform,
     courseUrl: cleanUrl,
     subject: detectLikelyCategory(combinedText),
     courseCount,
     pricing: prices,
     contact: {
-      website: metadata.sourceURL || cleanUrl,
+      website: canonicalizeUrl(metadata.sourceURL || cleanUrl),
       emails,
       socials,
     },

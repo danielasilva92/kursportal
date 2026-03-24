@@ -4,29 +4,55 @@ export function extractEmails(text = "") {
 }
 
 export function extractPrices(text = "") {
-  const matches = text.match(/\b(?:\d{2,3}(?:[ .]?\d{3})*|\d{2,6})\s?(?:kr|sek)\b|\b(?:kr|sek)\s?(?:\d{2,3}(?:[ .]?\d{3})*|\d{2,6})\b/gi);
-  return matches ? [...new Set(matches)] : [];
-}
+  const matches =
+    text.match(/\b(?:\d{2,3}(?:[ .]?\d{3})*|\d{2,6})\s?(?:kr|sek)\b|\b(?:kr|sek)\s?(?:\d{2,3}(?:[ .]?\d{3})*|\d{2,6})\b/gi) || [];
 
-export function extractSocials(text = "") {
-  const urls = text.match(/https?:\/\/[^\s)"<\]]+/gi) || [];
   return [
     ...new Set(
-      urls.filter((url) => {
-        const lower = url.toLowerCase();
-        return (
-          lower.includes("instagram.com/") ||
-          lower.includes("facebook.com/") ||
-          lower.includes("linkedin.com/in/") ||
-          lower.includes("linkedin.com/company/") ||
-          lower.includes("youtube.com/") ||
-          lower.includes("tiktok.com/@")
-        );
+      matches.filter((price) => {
+        const digits = price.replace(/[^0-9]/g, "");
+        if (!digits) return false;
+        if (/^0+$/.test(digits)) return false;
+        return parseInt(digits, 10) >= 50;
       })
     ),
   ];
 }
 
+export function extractSocials(text = "") {
+  const urls = text.match(/https?:\/\/[^\s)"<\]]+/gi) || [];
+
+  return [
+    ...new Set(
+      urls.filter((url) => {
+        const lower = url.toLowerCase().trim();
+
+        const isShareLink =
+          lower.includes("facebook.com/sharer") ||
+          lower.includes("share?u=") ||
+          lower.includes("translate.google.com/website");
+
+        const isBadYoutube =
+          lower.includes("youtube.com/watch");
+
+        const isBadFacebook =
+          lower.includes("facebook.com/share") ||
+          lower.includes("facebook.com/sharer.php");
+
+        const isValidSocial =
+          lower.includes("instagram.com/") ||
+          lower.includes("facebook.com/") ||
+          lower.includes("linkedin.com/in/") ||
+          lower.includes("linkedin.com/company/") ||
+          lower.includes("youtube.com/channel/") ||
+          lower.includes("youtube.com/@") ||
+          lower.includes("tiktok.com/@");
+
+        return isValidSocial && !isShareLink && !isBadYoutube && !isBadFacebook;
+      })
+    ),
+  ];
+}
 export function extractCourseCount(text = "") {
   const patterns = [
     /(\d+)\s*(online)?kurser/i,
