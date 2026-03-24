@@ -1,20 +1,36 @@
+const CATEGORIES = [
+  { label: "Design & UX", keywords: ["ux", "ui design", "grafisk design", "figma", "photoshop", "illustrator", "webbdesign", "graphic design"] },
+  { label: "Marknadsföring", keywords: ["seo", "marknadsföring", "content marketing", "sociala medier", "google ads", "facebook ads", "e-postmarknadsföring", "digital marketing"] },
+  { label: "Fotografi", keywords: ["fotografi", "fotografering", "foto ", "lightroom", "kamera", "photography", "portrait"] },
+  { label: "Ledarskap", keywords: ["ledarskap", "ledare", "chef", "management", "teamledning", "hr ", "human resources"] },
+  { label: "Programmering", keywords: ["programmering", "kod", "python", "javascript", "react", "webbutveckling", "developer", "coding", "software"] },
+  { label: "Hälsa & Träning", keywords: ["hälsa", "träning", "yoga", "fitness", "kost", "nutrition", "mindfulness", "meditation", "pilates"] },
+  { label: "Ekonomi", keywords: ["ekonomi", "bokföring", "redovisning", "aktier", "sparande", "privatekonomi", "investeringar", "budget"] },
+  { label: "Musik", keywords: ["musik", "gitarr", "piano", "sång", "musikproduktion", "dj", "låtskrivning", "music"] },
+  { label: "Språk", keywords: ["engelska", "spanska", "franska", "tyska", "arabiska", "kinesiska", "språkkurs", "language"] },
+  { label: "Business", keywords: ["business", "entreprenör", "företagande", "startup", "försäljning", "ehandel", "e-commerce", "affärsutveckling"] },
+  { label: "Coaching", keywords: ["coaching", "coach", "livscoach", "personlig utveckling", "självledarskap", "mindset"] },
+  { label: "Mat & Bakning", keywords: ["bakning", "matlagning", "kock", "konditori", "recept", "cooking", "baking"] },
+  { label: "Produktivitet", keywords: ["excel", "office", "produktivitet", "tidshantering", "notion", "projektledning"] },
+  { label: "Offentlig upphandling", keywords: ["upphandling", "lou", "offentlig upphandlare"] },
+{ label: "Personlig utveckling", keywords: ["personlig utveckling", "självledarskap", "mindset", "livscoach"] },
+];
+
 export function detectLikelyCategory(text = "") {
   const lower = text.toLowerCase();
+  let bestLabel = "Övrigt";
+  let bestScore = 0;
 
-  if (lower.includes("ux") || lower.includes("design")) return "Design";
-  if (lower.includes("seo") || lower.includes("marknadsföring")) return "Marknadsföring";
-  if (lower.includes("foto") || lower.includes("fotografer")) return "Fotografi";
-  if (lower.includes("ledarskap")) return "Ledarskap";
-  if (lower.includes("excel") || lower.includes("office")) return "Produktivitet";
-  if (lower.includes("programmering") || lower.includes("kod")) return "Tech";
-  if (lower.includes("hälsa") || lower.includes("träning")) return "Hälsa";
-  if (lower.includes("business")) return "Business";
-  if (lower.includes("coaching")) return "Coaching";
-  if (lower.includes("yoga")) return "Hälsa";
-  if (lower.includes("coach")) return "Coaching";
-if (lower.includes("developer")) return "Tech";
-if (lower.includes("entreprenör")) return "Business";
-if (lower.includes("företagande")) return "Business";
+  for (const category of CATEGORIES) {
+    let score = 0;
+    for (const keyword of category.keywords) {
+      if (lower.includes(keyword)) score++;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestLabel = category.label;
+    }
+  }
 
-  return "Okänd";
+  return bestLabel;
 }
