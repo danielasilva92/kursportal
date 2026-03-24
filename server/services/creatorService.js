@@ -1,4 +1,4 @@
-import { scrapePage } from "./fireCrawlService.js";
+
 import { detectPlatform } from "../utils/detectPlatform.js";
 import { extractCreatorData } from "../utils/extractCreatorData.js";
 
@@ -95,8 +95,6 @@ function isIgnored(url = "") {
     lower.includes("translate.google.com") ||
     lower.includes("cdn.") ||
     lower.includes("/podcasts/") ||
-lower.includes("/feed") ||
-lower.includes("/podcasts/") ||
 lower.includes("/feed") ||
     /\.(jpg|jpeg|png|webp|gif|svg|pdf|zip)(\?|$)/i.test(lower)
   );

@@ -9,6 +9,8 @@ import { Search, Filter } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
+const PAGE_SIZE = 10;
+
 const Index = () => {
   const heroRef = useRef<HTMLElement>(null);
   const { scrollY } = useScroll();
@@ -45,18 +47,20 @@ const Index = () => {
   };
 
   const handleNewCreators = (newCreators: Creator[]) => {
-    setCreators((prev) => [...prev, ...newCreators]);
+    setCreators((prev) => {
+      const existingUrls = new Set(prev.map((c) => c.url));
+      const unique = newCreators.filter((c) => !existingUrls.has(c.url));
+      return [...prev, ...unique];
+    });
   };
 
   return (
     <div className="min-h-screen">
-      {/* Hero header */}
       <motion.header
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity }}
         className="gradient-hero px-6 pt-10 pb-14 md:pt-14 md:pb-20 relative overflow-hidden"
       >
-        {/* Floating orbs with parallax scale */}
         <motion.div
           className="absolute top-8 right-[15%] w-32 h-32 rounded-full bg-mauve/10 blur-2xl"
           style={{ scale: orbScale }}
@@ -113,7 +117,6 @@ const Index = () => {
 
         <BatchPanel onCreatorsFound={handleNewCreators} />
 
-        {/* Filters & export */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -124,7 +127,7 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Sök kreatör, ämne, plattform…"
+              placeholder="Sök kreatör, ämne, plattform..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 rounded-full bg-card border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
@@ -148,16 +151,11 @@ const Index = () => {
           </div>
         </motion.div>
 
-        <CreatorTable creators={filteredCreators} onStatusChange={handleStatusChange} />
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-xs text-muted-foreground pt-4"
-        >
-          {filteredCreators.length} av {creators.length} kreatörer visas
-        </motion.p>
+        <CreatorTable
+          creators={filteredCreators}
+          onStatusChange={handleStatusChange}
+          pageSize={PAGE_SIZE}
+        />
       </main>
     </div>
   );

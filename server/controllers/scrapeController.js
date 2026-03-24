@@ -1,4 +1,4 @@
-import { scrapePage } from "../services/fireCrawlService.js";
+
 import {
   findCreatorsFromUrls,
   discoverCreatorUrls,
@@ -22,7 +22,7 @@ export async function scrapeUrl(req, res) {
       content: result.markdown,
     });
   } catch (error) {
-    console.error("Firecrawl error:", error);
+  
     res.status(500).json({
       error: "Scraping failed",
       details: error?.message || "Unknown error",
