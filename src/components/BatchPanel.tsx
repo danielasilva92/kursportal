@@ -3,82 +3,159 @@ import type { BatchJob, Creator } from "@/types/creator";
 import { Play, Loader2, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { runPipeline, discoverUrls, findCreators } from "../lib/api";
 
 const batchTemplates: Omit<
-BatchJob,
- "id" | "status" | "progress" | "foundItems" | "startedAt" | "completedAt"
- >[]
-  = [
-  { type: "google_serp", label: "Google SERP — Svenska nyckelord + Teachable/Kajabi", totalItems: 50 },
-  { type: "dns_lookup", label: "DNS/CNAME Lookup — Svenska domäner → LMS-plattformar", totalItems: 30 },
-  { type: "aggregator_scrape", label: "Scrapa kurser.se & utbildning.se", totalItems: 40 },
+  BatchJob,
+  "id" | "status" | "progress" | "foundItems" | "startedAt" | "completedAt"
+>[] = [
+  { type: "google_serp", label: "Google SERP och aggregatorsidor", totalItems: 60 },
+  { type: "aggregator_scrape", label: "Kurser.se och utbildning.se", totalItems: 40 },
+  { type: "manual_import", label: "Manuell URL-import", totalItems: 0 },
 ];
 
 interface BatchPanelProps {
   onCreatorsFound: (creators: Creator[]) => void;
 }
 
-const generateFakeCreators = (count: number): Creator[] => {
-  const names = ["Karin Ek", "Oskar Blom", "Frida Häll", "Jonas Vik", "Elin Dahl", "Nils Fors", "Sara Lid", "Axel Gran"];
-  const subjects = ["UX Design", "SEO", "Fotografering", "Copywriting", "Ledarskap", "Excel", "AI & Automation", "Hälsa"];
-  const platforms: Creator["platform"][] = ["Teachable", "Kajabi", "Thinkific", "Podia"];
-  return Array.from({ length: count }, (_, i) => ({
-    id: `batch-${Date.now()}-${i}`,
-    name: names[i % names.length],
-    platform: platforms[i % platforms.length],
-    url: `https://example-${i}.teachable.com`,
-    subject: subjects[i % subjects.length],
-    courseCount: Math.floor(Math.random() * 10) + 1,
-    pricing: `${Math.floor(Math.random() * 3000) + 299} kr`,
-    source: "Batch import",
-    status: "ny" as const,
-    addedAt: new Date().toISOString().slice(0, 10),
-  }));
-};
-
 const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
   const [jobs, setJobs] = useState<BatchJob[]>([]);
   const [isRunningAll, setIsRunningAll] = useState(false);
+  const [manualUrls, setManualUrls] = useState("");
+  const [showManual, setShowManual] = useState(false);
 
-  const startJob = useCallback((template: typeof batchTemplates[number]) => {
-    const job: BatchJob = {
-      ...template,
-      id: `job-${Date.now()}`,
-      status: "running",
-      progress: 0,
-      foundItems: 0,
-      startedAt: new Date().toISOString(),
-    };
-    setJobs((prev) => [...prev, job]);
-    const interval = setInterval(() => {
-      setJobs((prev) =>
-        prev.map((j) => {
-          if (j.id !== job.id) return j;
-          const newProgress = Math.min(j.progress + Math.random() * 18 + 5, 100);
-          const done = newProgress >= 100;
-          const found = done ? Math.floor(Math.random() * 8) + 2 : Math.floor((newProgress / 100) * (Math.random() * 8 + 2));
-          if (done) {
-            clearInterval(interval);
-            onCreatorsFound(generateFakeCreators(found));
-          }
-          return { ...j, progress: done ? 100 : newProgress, foundItems: found, status: done ? "completed" : "running", completedAt: done ? new Date().toISOString() : undefined };
-        })
-      );
-    }, 600);
-  }, [onCreatorsFound]);
+  const updateJob = useCallback((id: string, patch: Partial<BatchJob>) => {
+    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...patch } : j)));
+  }, []);
+
+  const createJob = (template: (typeof batchTemplates)[number]): BatchJob => ({
+    ...template,
+    id: `job-${Date.now()}-${Math.random()}`,
+    status: "running",
+    progress: 0,
+    foundItems: 0,
+    startedAt: new Date().toISOString(),
+  });
+
+  const runGoogleSerp = useCallback(
+    async (jobId: string) => {
+      try {
+        updateJob(jobId, { progress: 15 });
+        const found = await runPipeline(20);
+        updateJob(jobId, {
+          status: "completed",
+          progress: 100,
+          foundItems: found.length,
+          completedAt: new Date().toISOString(),
+        });
+        if (found.length > 0) onCreatorsFound(found);
+      } catch {
+        updateJob(jobId, { status: "failed", progress: 0 });
+      }
+    },
+    [onCreatorsFound, updateJob]
+  );
+
+  const runAggregator = useCallback(
+    async (jobId: string) => {
+      try {
+        updateJob(jobId, { progress: 20 });
+        const urls = await discoverUrls();
+        updateJob(jobId, { progress: 55 });
+
+        if (urls.length === 0) {
+          updateJob(jobId, {
+            status: "completed",
+            progress: 100,
+            foundItems: 0,
+            completedAt: new Date().toISOString(),
+          });
+          return;
+        }
+
+        const found = await findCreators(urls.slice(0, 20));
+        updateJob(jobId, {
+          status: "completed",
+          progress: 100,
+          foundItems: found.length,
+          completedAt: new Date().toISOString(),
+        });
+        if (found.length > 0) onCreatorsFound(found);
+      } catch {
+        updateJob(jobId, { status: "failed", progress: 0 });
+      }
+    },
+    [onCreatorsFound, updateJob]
+  );
+
+  const runManualImport = useCallback(
+    async (jobId: string) => {
+      const urls = manualUrls
+        .split("\n")
+        .map((u) => u.trim())
+        .filter((u) => u.startsWith("http"));
+
+      if (urls.length === 0) {
+        updateJob(jobId, { status: "failed", progress: 0 });
+        return;
+      }
+
+      try {
+        updateJob(jobId, { status: "running", progress: 20, totalItems: urls.length });
+        const found = await findCreators(urls);
+        updateJob(jobId, {
+          status: "completed",
+          progress: 100,
+          foundItems: found.length,
+          completedAt: new Date().toISOString(),
+        });
+        if (found.length > 0) onCreatorsFound(found);
+      } catch {
+        updateJob(jobId, { status: "failed", progress: 0 });
+      }
+    },
+    [onCreatorsFound, updateJob, manualUrls]
+  );
+
+  const startJob = useCallback(
+    (template: (typeof batchTemplates)[number]) => {
+      const job = createJob(template);
+      setJobs((prev) => [...prev, job]);
+
+      if (template.type === "google_serp") runGoogleSerp(job.id);
+      else if (template.type === "aggregator_scrape") runAggregator(job.id);
+      else if (template.type === "manual_import") runManualImport(job.id);
+    },
+    [runGoogleSerp, runAggregator, runManualImport]
+  );
 
   const runAll = () => {
     setIsRunningAll(true);
-    batchTemplates.forEach((t, i) => { setTimeout(() => startJob(t), i * 1200); });
-    setTimeout(() => setIsRunningAll(false), batchTemplates.length * 1200 + 4000);
+    const autoTemplates = batchTemplates.filter((t) => t.type !== "manual_import");
+    autoTemplates.forEach((t, i) => {
+      setTimeout(() => startJob(t), i * 800);
+    });
+    setTimeout(() => setIsRunningAll(false), autoTemplates.length * 800 + 60000);
   };
 
   const statusIcon = (status: BatchJob["status"]) => {
     switch (status) {
-      case "running": return <Loader2 className="w-4 h-4 text-mauve animate-spin" />;
-      case "completed": return <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400 }}><CheckCircle2 className="w-4 h-4 text-mauve" /></motion.div>;
-      case "failed": return <AlertCircle className="w-4 h-4 text-destructive" />;
-      default: return null;
+      case "running":
+        return <Loader2 className="w-4 h-4 text-mauve animate-spin" />;
+      case "completed":
+        return (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 400 }}
+          >
+            <CheckCircle2 className="w-4 h-4 text-mauve" />
+          </motion.div>
+        );
+      case "failed":
+        return <AlertCircle className="w-4 h-4 text-destructive" />;
+      default:
+        return null;
     }
   };
 
@@ -109,7 +186,15 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
             disabled={isRunningAll}
             className="bg-mauve text-primary-foreground hover:bg-mauve/90 rounded-full px-5"
           >
-            {isRunningAll ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Kör batch…</> : <><Play className="w-4 h-4 mr-2" /> Kör alla</>}
+            {isRunningAll ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Söker...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-2" /> Kör alla
+              </>
+            )}
           </Button>
         </motion.div>
       </div>
@@ -117,26 +202,63 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
       <div className="space-y-3">
         {batchTemplates.map((template, i) => {
           const activeJob = jobs.filter((j) => j.type === template.type).slice(-1)[0];
+          const isManual = template.type === "manual_import";
+
           return (
             <motion.div
               key={template.type}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.25 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center gap-3 p-3 rounded-md bg-background/50 group"
+              className="flex items-start gap-3 p-3 rounded-md bg-background/50 group"
             >
-              {activeJob ? statusIcon(activeJob.status) : (
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => startJob(template)}
-                  className="w-7 h-7 rounded-md bg-mauve/10 flex items-center justify-center hover:bg-mauve/20 transition-colors"
-                >
-                  <Play className="w-3.5 h-3.5 text-mauve" />
-                </motion.button>
-              )}
+              <div className="mt-0.5 shrink-0">
+                {activeJob ? (
+                  statusIcon(activeJob.status)
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      if (isManual) setShowManual((v) => !v);
+                      else startJob(template);
+                    }}
+                    className="w-7 h-7 rounded-md bg-mauve/10 flex items-center justify-center hover:bg-mauve/20 transition-colors"
+                  >
+                    <Play className="w-3.5 h-3.5 text-mauve" />
+                  </motion.button>
+                )}
+              </div>
+
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{template.label}</p>
+                <p className="text-sm font-medium">{template.label}</p>
+
+                <AnimatePresence>
+                  {isManual && showManual && !activeJob && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="mt-2 overflow-hidden"
+                    >
+                      <textarea
+                        className="w-full text-xs rounded-md border border-border bg-background p-2 resize-none focus:outline-none focus:ring-2 focus:ring-ring/30"
+                        rows={4}
+                        placeholder={"En URL per rad\nhttps://kreativ.teachable.com\nhttps://marknadsfor.kajabi.com"}
+                        value={manualUrls}
+                        onChange={(e) => setManualUrls(e.target.value)}
+                      />
+                      <Button
+                        size="sm"
+                        className="mt-2 bg-mauve text-primary-foreground hover:bg-mauve/90 rounded-full text-xs px-4"
+                        onClick={() => startJob(template)}
+                      >
+                        Starta import
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <AnimatePresence>
                   {activeJob && (
                     <motion.div
@@ -159,7 +281,11 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
                         initial={{ scale: 1.3, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                       >
-                        {activeJob.foundItems} hittade
+                        {activeJob.status === "failed"
+                          ? "Misslyckades"
+                          : activeJob.status === "running"
+                          ? "Hämtar..."
+                          : `${activeJob.foundItems} hittade`}
                       </motion.span>
                     </motion.div>
                   )}

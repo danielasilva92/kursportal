@@ -21,6 +21,7 @@ export function convertCreatorsToCsv(creators) {
     "description",
     "likelySwedish",
     "leadScore",
+    "courseName",
   ];
 
   const parser = new Parser({ fields });
