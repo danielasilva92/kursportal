@@ -5,7 +5,7 @@ import {
   discoverCreators,
   exportCsv,
    runPipeline,
-} from "../controllers/scrapeController.js";
+} from "../controllers/ScrapeController.js";
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
-import { scrapePage } from "./scraper.js";
-import { buildCreator } from "../utils/builder.js";
+import { scrapePage } from "./Scraper.js";
+import { buildCreator } from "../utils/Builder.js";
 import {
   isPlatformCreatorUrl,
   isAggregatorCreatorUrl,
@@ -7,7 +7,7 @@ import {
   scoreUrl,
   normalizeUrl,
   detectPlatform,
-} from "../utils/platform.js";
+} from "../utils/Platform.js";
 
 const AGGREGATOR_SEEDS = [
   "https://www.kurser.se/kurser/distans",

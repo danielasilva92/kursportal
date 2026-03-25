@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import scrapeRoutes from "./routes/scrapeRoutes.js";
+import scrapeRoutes from "./routes/ScrapeRoutes.js";
 
 dotenv.config();
 
