@@ -6,6 +6,7 @@ import {
 } from "../services/CreatorService.js";
 
 import { convertCreatorsToCsv } from "../services/ExportService.js";
+import { analyzeCreatorWithAI } from "../services/aiAnalysisService.js";
 
 export async function scrapeUrl(req, res) {
   try {
@@ -79,5 +80,27 @@ export async function runPipeline(req, res) {
     });
   } catch (error) {
     res.status(500).json({ error: "Pipeline misslyckades", details: error?.message });
+  }
+}
+
+export async function analyzeCreator(req, res) {
+  try {
+    const { creator } = req.body;
+
+    if (!creator || typeof creator !== "object") {
+      return res.status(400).json({ error: "creator måste skickas med i request body" });
+    }
+
+    const analysis = await analyzeCreatorWithAI(creator);
+
+    res.json({
+      success: true,
+      analysis,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "AI-analys misslyckades",
+      details: error?.message || "Okänt fel",
+    });
   }
 }

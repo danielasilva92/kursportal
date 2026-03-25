@@ -8,6 +8,7 @@ import ExportButton from "@/components/ExportButton";
 import { Search, Filter } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import AIInsightPanel from "@/components/AIInsightPanel";
 
 const PAGE_SIZE = 10;
 
@@ -19,9 +20,12 @@ const Index = () => {
   const orbScale = useTransform(scrollY, [0, 400], [1, 1.4]);
   const textY = useTransform(scrollY, [0, 400], [0, -40]);
 
+
   const [creators, setCreators] = useState<Creator[]>(mockCreators);
   const [searchQuery, setSearchQuery] = useState("");
   const [platformFilter, setPlatformFilter] = useState<string>("all");
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  
 
   const filteredCreators = useMemo(() => {
     return creators.filter((c) => {
@@ -107,56 +111,74 @@ const Index = () => {
         </motion.div>
       </motion.header>
 
-      <main className="container max-w-6xl px-6 -mt-8 pb-16 space-y-6">
-        <StatsCards
-          totalCreators={creators.length}
-          platformBreakdown={platformBreakdown}
-          contacted={creators.filter((c) => c.status === "kontaktad").length}
-          interested={creators.filter((c) => c.status === "intresserad").length}
-        />
+      <main className="max-w-[1400px] mx-auto px-6 -mt-8 pb-16">
+  <div className="flex items-start gap-8">
+    <div className="w-full max-w-6xl space-y-6">
+      <StatsCards
+        totalCreators={creators.length}
+        platformBreakdown={platformBreakdown}
+        contacted={creators.filter((c) => c.status === "kontaktad").length}
+        interested={creators.filter((c) => c.status === "intresserad").length}
+      />
 
-        <BatchPanel onCreatorsFound={handleNewCreators} />
+      <BatchPanel onCreatorsFound={handleNewCreators} />
 
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
-        >
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Sök kreatör, ämne, plattform..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-full bg-card border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <select
-              value={platformFilter}
-              onChange={(e) => setPlatformFilter(e.target.value)}
-              className="bg-card border border-border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer"
-            >
-              <option value="all">Alla plattformar</option>
-              {platforms.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          </div>
-          <div className="sm:ml-auto">
-            <ExportButton creators={filteredCreators} />
-          </div>
-        </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.25,
+          duration: 0.5,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
+      >
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Sök kreatör, ämne, plattform..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 rounded-full bg-card border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
+          />
+        </div>
 
-        <CreatorTable
-          creators={filteredCreators}
-          onStatusChange={handleStatusChange}
-          pageSize={PAGE_SIZE}
-        />
-      </main>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <select
+            value={platformFilter}
+            onChange={(e) => setPlatformFilter(e.target.value)}
+            className="bg-card border border-border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer"
+          >
+            <option value="all">Alla plattformar</option>
+            {platforms.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="sm:ml-auto">
+          <ExportButton creators={filteredCreators} />
+        </div>
+      </motion.div>
+
+      <CreatorTable
+        creators={filteredCreators}
+        onStatusChange={handleStatusChange}
+        onSelectCreator={setSelectedCreator}
+        selectedCreatorId={selectedCreator?.id ?? null}
+        pageSize={PAGE_SIZE}
+      />
+    </div>
+
+    <div className="hidden xl:block w-[340px] shrink-0 pt-[120px]">
+      <AIInsightPanel creator={selectedCreator} />
+    </div>
+  </div>
+</main>
     </div>
   );
 };
