@@ -1,5 +1,4 @@
 import { extractEmails, extractPrices, extractSocials } from "../Extractors.js";
-import { detectLikelyCategory } from "./detectLikelyCategory.js";
 import { detectPlatform } from "./Platform.js";
 import { isSwedish } from "./Swedish.js";
 

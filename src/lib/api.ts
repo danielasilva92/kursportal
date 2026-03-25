@@ -1,4 +1,5 @@
 import type { Creator } from "@/types/creator";
+import type { CreatorAIAnalysis } from "@/types/ai";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
 
@@ -26,7 +27,7 @@ function mapToCreator(raw: ApiCreator, index: number): Creator {
     : "Annat";
 
   return {
-    id: `api-${Date.now()}-${index}`,
+    id: raw.courseUrl ?? `api-${index}`,
     name: raw.creatorName ?? "Okänd kreatör",
     platform,
     url: raw.courseUrl ?? "",
@@ -70,4 +71,27 @@ export async function findCreators(urls: string[]): Promise<Creator[]> {
   return (data.creators ?? [])
     .filter((c: ApiCreator & { likelySwedish?: boolean }) => c.likelySwedish !== false)
     .map(mapToCreator);
+}
+
+export async function analyzeCreator(creator: Creator): Promise<CreatorAIAnalysis> {
+  const res = await fetch(`${BASE_URL}/api/analyze-creator`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ creator }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.details || `AI-analys misslyckades: ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  if (!data?.analysis) {
+    throw new Error("Backend returnerade ingen AI-analys");
+  }
+
+  return data.analysis;
 }
