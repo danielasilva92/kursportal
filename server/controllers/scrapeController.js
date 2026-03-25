@@ -1,127 +1,83 @@
-
 import {
   findCreatorsFromUrls,
   discoverCreatorUrls,
   runDiscoveryPipeline,
-} from "../services/creatorService.js";
-import { convertCreatorsToCsv } from "../services/exportService.js";
+  scrapeAndBuildCreator,
+} from "../services/CreatorService.js";
+
+import { convertCreatorsToCsv } from "../services/ExportService.js";
 
 export async function scrapeUrl(req, res) {
   try {
     const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "URL saknas" });
 
-    if (!url) {
-      return res.status(400).json({ error: "URL is required" });
-    }
-
-    const result = await scrapePage(url);
-
-    res.json({
-      title: result.metadata?.title,
-      description: result.metadata?.description,
-      content: result.markdown,
-    });
+    const creator = await scrapeAndBuildCreator(url);
+    res.json({ success: true, creator });
   } catch (error) {
-  
-    res.status(500).json({
-      error: "Scraping failed",
-      details: error?.message || "Unknown error",
-    });
+    res.status(500).json({ error: "Skrapning misslyckades", details: error?.message });
   }
 }
 
 export async function findCreators(req, res) {
   try {
     const { urls } = req.body;
-
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
-      return res.status(400).json({ error: "urls must be a non-empty array" });
+      return res.status(400).json({ error: "urls måste vara en array med minst ett värde" });
     }
 
     const results = await findCreatorsFromUrls(urls);
 
-    const swedish = results.filter((creator) => creator.likelySwedish);
-    const nonSwedish = results.filter((creator) => !creator.likelySwedish);
-
     res.json({
       success: true,
       totalCount: results.length,
-      swedishCount: swedish.length,
-      nonSwedishCount: nonSwedish.length,
+      swedishCount: results.filter((c) => c.likelySwedish).length,
       creators: results,
     });
   } catch (error) {
-    console.error("find-creators error:", error);
-    res.status(500).json({
-      error: "Finding creators failed",
-      details: error?.message || "Unknown error",
-    });
+    res.status(500).json({ error: "find-creators misslyckades", details: error?.message });
   }
 }
 
 export async function discoverCreators(req, res) {
   try {
-    const unique = await discoverCreatorUrls();
-
-    res.json({
-      success: true,
-      count: unique.length,
-      urls: unique,
-    });
+    const urls = await discoverCreatorUrls();
+    res.json({ success: true, count: urls.length, urls });
   } catch (error) {
-    console.error("discover-creators error:", error);
-    res.status(500).json({
-      error: "Discovery failed",
-      details: error?.message || "Unknown error",
-    });
+    res.status(500).json({ error: "Discovery misslyckades", details: error?.message });
   }
 }
 
 export async function exportCsv(req, res) {
   try {
     const { creators } = req.body;
-
     if (!creators || !Array.isArray(creators) || creators.length === 0) {
-      return res.status(400).json({ error: "creators must be a non-empty array" });
+      return res.status(400).json({ error: "creators måste vara en array med minst ett värde" });
     }
 
     const csv = convertCreatorsToCsv(creators);
-
     res.header("Content-Type", "text/csv; charset=utf-8");
-    res.attachment("creators.csv");
-    return res.send(csv);
+    res.attachment("kreatorer.csv");
+    res.send(csv);
   } catch (error) {
-    console.error("export-csv error:", error);
-    res.status(500).json({
-      error: "CSV export failed",
-      details: error?.message || "Unknown error",
-    });
+    res.status(500).json({ error: "CSV-export misslyckades", details: error?.message });
   }
 }
 
 export async function runPipeline(req, res) {
   try {
-    const limit = Number(req.query.limit) || 20;
-
+    const limit = Math.min(Number(req.query.limit) || 20, 60);
     const result = await runDiscoveryPipeline(limit);
-
-    const swedish = result.creators.filter((creator) => creator.likelySwedish);
-    const nonSwedish = result.creators.filter((creator) => !creator.likelySwedish);
 
     res.json({
       success: true,
       discoveredCount: result.discoveredCount,
       selectedCount: result.selectedCount,
       creatorsCount: result.creatorsCount,
-      swedishCount: swedish.length,
-      nonSwedishCount: nonSwedish.length,
+      swedishCount: result.creators.filter((c) => c.likelySwedish).length,
       creators: result.creators,
     });
   } catch (error) {
-    console.error("run-pipeline error:", error);
-    res.status(500).json({
-      error: "Pipeline failed",
-      details: error?.message || "Unknown error",
-    });
+    res.status(500).json({ error: "Pipeline misslyckades", details: error?.message });
   }
 }
