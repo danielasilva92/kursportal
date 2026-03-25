@@ -1,9 +1,25 @@
 const visited = new Set();
 const queue = [];
 
+function normalizeQueueUrl(url = "") {
+  return url.trim().replace(/\/+$/, "");
+}
+
+export function resetQueue() {
+  visited.clear();
+  queue.length = 0;
+}
+
 export function addToQueue(url) {
-  if (!url || visited.has(url)) return;
-  queue.push(url);
+  if (!url) return;
+
+  const normalized = normalizeQueueUrl(url);
+  if (!normalized) return;
+
+  if (visited.has(normalized)) return;
+  if (queue.includes(normalized)) return;
+
+  queue.push(normalized);
 }
 
 export function getNextUrl() {
@@ -11,9 +27,18 @@ export function getNextUrl() {
 }
 
 export function markVisited(url) {
-  visited.add(url);
+  if (!url) return;
+  visited.add(normalizeQueueUrl(url));
 }
 
 export function hasMoreUrls() {
   return queue.length > 0;
+}
+
+export function getQueueSize() {
+  return queue.length;
+}
+
+export function getVisitedCount() {
+  return visited.size;
 }

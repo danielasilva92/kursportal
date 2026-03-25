@@ -1,7 +1,7 @@
-import { extractEmails, extractPrices, extractSocials } from "./extractors.js";
+import { extractEmails, extractPrices, extractSocials } from "../Extractors.js";
 import { detectLikelyCategory } from "./detectLikelyCategory.js";
-import { detectPlatform } from "./detectPlatform.js";
-import { isSwedish } from "./isSwedish.js";
+import { detectPlatform } from "./Platform.js";
+import { isSwedish } from "./Swedish.js";
 
 const AGGREGATOR_TITLE_PATTERNS = [
   /^(distansutbildningar|onlinekurser|kurser online|utbildningar online|alla kurser|kurskatalog|sök kurs|hitta kurs)/i,
