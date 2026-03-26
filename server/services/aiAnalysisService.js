@@ -28,7 +28,8 @@ function sanitizeCreator(creator = {}) {
     pricing: creator.pricing ?? "",
     email: creator.email ?? creator.contact?.emails?.[0] ?? "",
     website: creator.website ?? creator.contact?.website ?? "",
-    socialMedia: creator.socialMedia ?? creator.contact?.socials?.join(", ") ?? "",
+    socialMedia:
+      creator.socialMedia ?? creator.contact?.socials?.join(", ") ?? "",
     estimatedReach: creator.estimatedReach ?? "",
     source: creator.source ?? creator.dataSource ?? "Okänd källa",
     description: creator.description ?? "",
@@ -54,28 +55,15 @@ Mål:
 6. Lista saknade datapunkter
 7. Ge ett tydligt nästa steg
 
-Svara ENDAST som JSON enligt detta schema:
-
-{
-  "summary": "string",
-  "swedishMarketScore": 0,
-  "leadPotential": "Låg",
-  "suggestedCategory": "string",
-  "outreachAngle": "string",
-  "dataQuality": "Låg",
-  "missingData": ["string"],
-  "nextStep": "string",
-  "confidence": 0,
-  "reasoningBrief": "string"
-}
+Svara endast som JSON enligt detta schema.
 
 Regler:
 - Var försiktig med antaganden
 - Om data saknas, skriv det tydligt
 - Basera bedömningen på den information som finns
 - SwedishMarketScore och confidence ska vara heltal 0 till 100
-- leadPotential måste vara exakt en av: Låg, Medel, Hög
-- dataQuality måste vara exakt en av: Låg, Medel, Hög
+- leadPotential måste vara exakt en av: "Låg", "Medel", "Hög"
+- dataQuality måste vara exakt en av: "Låg", "Medel", "Hög"
 
 Data om kreatören:
 ${JSON.stringify(creator, null, 2)}
@@ -84,17 +72,59 @@ ${JSON.stringify(creator, null, 2)}
   const response = await client.responses.create({
     model: process.env.OPENAI_MODEL || "gpt-4o",
     input: prompt,
+    text: {
+      format: {
+        type: "json_schema",
+        name: "creator_analysis",
+        schema: {
+          type: "object",
+          properties: {
+            summary: { type: "string" },
+            swedishMarketScore: { type: "number" },
+            leadPotential: {
+              type: "string",
+              enum: ["Låg", "Medel", "Hög"],
+            },
+            suggestedCategory: { type: "string" },
+            outreachAngle: { type: "string" },
+            dataQuality: {
+              type: "string",
+              enum: ["Låg", "Medel", "Hög"],
+            },
+            missingData: {
+              type: "array",
+              items: { type: "string" },
+            },
+            nextStep: { type: "string" },
+            confidence: { type: "number" },
+            reasoningBrief: { type: "string" },
+          },
+          required: [
+            "summary",
+            "swedishMarketScore",
+            "leadPotential",
+            "suggestedCategory",
+            "outreachAngle",
+            "dataQuality",
+            "missingData",
+            "nextStep",
+            "confidence",
+            "reasoningBrief",
+          ],
+          additionalProperties: false,
+        },
+        strict: true,
+      },
+    },
   });
 
-  const text = response.output_text?.trim();
-
-  if (!text) {
+  if (!response.output_text) {
     throw new Error("AI returnerade inget svar");
   }
 
   let parsed;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(response.output_text);
   } catch {
     throw new Error("AI-svaret gick inte att tolka som JSON");
   }
