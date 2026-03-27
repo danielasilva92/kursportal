@@ -7,7 +7,7 @@ import {
   runPipeline,
   analyzeCreator,
   runDeepScan,
-} from "../controllers/ScrapeController.js";
+} from "../controllers/scrapeController.js";
 
 const router = express.Router();
 

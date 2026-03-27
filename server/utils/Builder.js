@@ -9,7 +9,7 @@ import {
   extractFollowerCount,
   detectCategory,
   estimateReach,
-} from "./Extractors.js";
+} from "./extractors.js";
 
 export function buildCreator(url, markdown, metadata) {
   const title = metadata.title || "";

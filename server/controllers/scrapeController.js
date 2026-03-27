@@ -3,9 +3,9 @@ import {
   discoverCreatorUrls,
   runDiscoveryPipeline,
   scrapeAndBuildCreator,
-} from "../services/CreatorService.js";
+} from "../services/creatorService.js";
 
-import { convertCreatorsToCsv } from "../services/ExportService.js";
+import { convertCreatorsToCsv } from "../services/exportService.js";
 import { analyzeCreatorWithAI } from "../services/aiAnalysisService.js";
 import { discoverViaWayback } from "../services/WaybackDiscoveryService.js";
 
