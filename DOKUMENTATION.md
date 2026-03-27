@@ -135,7 +135,7 @@ Miljövariablerna `OPENAI_API_KEY`, `OPENAI_MODEL` och eventuellt `FACEBOOK_ACCE
 
 **Datakvalitet.** Hur mycket data som kan extraheras beror helt på hur sidan är uppbyggd. Prissättning och antal kurser syns inte alltid och kan saknas.
 
-**Ingen databas.** All data lagras bara i frontend-state och försvinner när man laddar om sidan. CSV-export är det enda sättet att spara resultaten just nu.
+**Ingen databas.** All data lagras i webbläsarens localStorage och finns kvar mellan sidladdningar så länge man använder samma webbläsare. CSV-export används för att flytta data mellan enheter eller dela med andra.
 
 ## Förslag på vidareutveckling
 
@@ -147,4 +147,4 @@ En betald sök-API som Bing Search eller Google Custom Search skulle ge bättre 
 
 Stöd för fler annonsplattformar som TikTok Ads eller LinkedIn Campaign Manager skulle kunna ge ytterligare träffar på svenska kreatörer.
 
-En deduplicering som slår ihop kreatörer som dyker upp från flera datakällor skulle minska dubbletter i listan.
+En deduplicering som slår ihop kreatörer som dyker upp från flera datakällor skulle minska dubbletter i listan ytterligare. Just nu dedupliceras på URL-nivå men inte på kreatörsnivå.

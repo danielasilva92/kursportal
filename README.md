@@ -62,7 +62,7 @@ npm run dev
 
 Tillgängliga datakällor:
 
-- **Google SERP och aggregatorsidor** kör hela discovery-flödet, skrapar kurser.se, utbildning.se och kör eventuellt Facebook Ads Library.
+- **Google SERP och aggregatorsidor** kör hela discovery-flödet, skrapar kurser.se och utbildning.se, och kör eventuellt Facebook Ads Library om token är satt.
 - **Kurser.se och utbildning.se** kör enbart aggregator-skrapningen.
 - **Djupskanning** använder Wayback Machine CDX för att hitta Kajabi och Teachable-subdomäner och skrapar ett slumpmässigt urval. Det tar flera minuter.
 - **Manuell URL-import** låter dig klistra in egna URLs, en per rad, och skrapa dem direkt.
@@ -71,7 +71,7 @@ En notis visas i gränssnittet och som webbläsarnotis när en sökning är klar
 
 **AI-analys** kan köras på enskilda kreatörer via knappen "Analysera med AI" i sidopanelen. Du får en sammanfattning, en poäng för hur sannolikt det är att de riktar sig till svensk marknad, och ett förslag på hur man kan kontakta dem.
 
-**Exportera CSV** laddar ner alla kreatörer i tabellen som en CSV-fil som öppnas korrekt i Excel.
+**Exportera CSV** laddar ner alla kreatörer i tabellen som en CSV-fil som öppnas korrekt i Excel. Om rader är markerade med kryssrutan exporteras bara de markerade.
 
 ## API-endpoints
 

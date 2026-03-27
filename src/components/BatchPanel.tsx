@@ -176,7 +176,7 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
       else if (template.type === "dns_lookup") runDeepScan(job.id);
       else if (template.type === "manual_import") runManualImport(job.id);
     },
-    [runGoogleSerp, runAggregator, runManualImport]
+    [runGoogleSerp, runAggregator, runDeepScan, runManualImport]
   );
 
   const runAll = () => {
