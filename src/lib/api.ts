@@ -17,6 +17,7 @@ interface ApiCreator {
   };
   estimatedReach?: string | null;
   dataSource?: string;
+  leadScore?: number;
 }
 
 function mapToCreator(raw: ApiCreator, index: number): Creator {
@@ -41,6 +42,7 @@ function mapToCreator(raw: ApiCreator, index: number): Creator {
     source: raw.dataSource ?? "API",
     status: "ny",
     addedAt: new Date().toISOString().slice(0, 10),
+    leadScore: raw.leadScore,
   };
 }
 

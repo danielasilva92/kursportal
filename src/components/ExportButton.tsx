@@ -4,17 +4,27 @@ import { Button } from "@/components/ui/button";
 
 interface ExportButtonProps {
   creators: Creator[];
+  selectedIds?: Set<string>;
 }
 
-const ExportButton = ({ creators }: ExportButtonProps) => {
+const ExportButton = ({ creators, selectedIds }: ExportButtonProps) => {
+  const hasSelection = selectedIds && selectedIds.size > 0;
+  const toExport = hasSelection ? creators.filter((c) => selectedIds.has(c.id)) : creators;
+
   const exportCSV = () => {
     const escape = (v: string | number) =>
       `"${String(v).replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
 
-    const headers = ["Namn", "Företag", "Plattform", "URL", "Ämne", "Antal kurser", "Prissättning", "E-post", "Webb", "Sociala medier", "Räckvidd", "Källa", "Status", "Tillagd"];
-    const rows = creators.map((c) => [
-      c.name, c.company ?? "", c.platform, c.url, c.subject, c.courseCount ?? "", c.pricing ?? "",
-      c.email ?? "", c.website ?? "", c.socialMedia ?? "", c.estimatedReach ?? "", c.source, c.status, c.addedAt,
+    const headers = [
+      "Namn", "Företag", "Plattform", "URL", "Ämne", "Antal kurser",
+      "Prissättning", "E-post", "Webb", "Sociala medier", "Räckvidd",
+      "Källa", "Status", "Score", "Anteckningar", "Tillagd",
+    ];
+    const rows = toExport.map((c) => [
+      c.name, c.company ?? "", c.platform, c.url, c.subject,
+      c.courseCount ?? "", c.pricing ?? "", c.email ?? "", c.website ?? "",
+      c.socialMedia ?? "", c.estimatedReach ?? "", c.source, c.status,
+      c.leadScore ?? "", c.notes ?? "", c.addedAt,
     ]);
     const csv = [headers, ...rows].map((r) => r.map(escape).join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -33,7 +43,7 @@ const ExportButton = ({ creators }: ExportButtonProps) => {
       className="rounded-full border-border hover:bg-card active:scale-[0.97] transition-all duration-150"
     >
       <Download className="w-4 h-4 mr-2" />
-      Exportera CSV
+      {hasSelection ? `Exportera urval (${selectedIds.size})` : "Exportera CSV"}
     </Button>
   );
 };

@@ -14,6 +14,8 @@ export interface Creator {
   source: string;
   status: "ny" | "kontaktad" | "intresserad" | "ej_intresserad";
   addedAt: string;
+  leadScore?: number;
+  notes?: string;
 }
 
 export interface BatchJob {
