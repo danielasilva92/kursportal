@@ -2,6 +2,8 @@ const STRONG_MARKERS = [
   "onlinekurs", "distanskurs", "anmäl dig", "välkommen till kursen",
   "lär dig", "swish", "bankid", "fortnox", "momsregistrerad",
   "org.nr", "faktura", "kursinnehåll", "lektionstillfälle",
+  "klarna", "klarnabetalning", "ingår i kursen", "du får tillgång",
+  "köp kursen", "starta kursen", "kursmaterial", "kursstart",
 ];
 
 const NORMAL_MARKERS = [

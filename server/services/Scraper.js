@@ -39,7 +39,15 @@ function parseHtml(url, html) {
   const links = [];
   $("a[href]").each((_, el) => {
     const href = $(el).attr("href");
-    if (href && href.startsWith("http")) links.push(href);
+    if (!href) return;
+    if (href.startsWith("http")) {
+      links.push(href);
+    } else if (href.startsWith("/")) {
+      try {
+        const base = new URL(url);
+        links.push(`${base.origin}${href}`);
+      } catch {}
+    }
   });
 
   const markdown =

@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { BatchJob, Creator } from "@/types/creator";
 import { Play, Loader2, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { runPipeline, discoverUrls, findCreators } from "../lib/api";
+import { toast } from "sonner";
+import { runPipeline, discoverUrls, findCreators, deepScan } from "../lib/api";
 
 const batchTemplates: Omit<
   BatchJob,
@@ -11,6 +12,7 @@ const batchTemplates: Omit<
 >[] = [
   { type: "google_serp", label: "Google SERP och aggregatorsidor", totalItems: 60 },
   { type: "aggregator_scrape", label: "Kurser.se och utbildning.se", totalItems: 40 },
+  { type: "dns_lookup", label: "Djupskanning (Teachable, Kajabi, Thinkific...)", totalItems: 20 },
   { type: "manual_import", label: "Manuell URL-import", totalItems: 0 },
 ];
 
@@ -23,6 +25,30 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
   const [isRunningAll, setIsRunningAll] = useState(false);
   const [manualUrls, setManualUrls] = useState("");
   const [showManual, setShowManual] = useState(false);
+
+  const prevJobsRef = useRef<BatchJob[]>([]);
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
+    for (const job of jobs) {
+      const prev = prevJobsRef.current.find((j) => j.id === job.id);
+      if (prev?.status === "running" && job.status === "completed") {
+        const msg = `${job.label}: ${job.foundItems} kreatörer hittade`;
+        toast.success(msg);
+        if (Notification.permission === "granted") {
+          new Notification("Sökning klar", { body: msg, icon: "/favicon.ico" });
+        }
+      } else if (prev?.status === "running" && job.status === "failed") {
+        toast.error(`${job.label} misslyckades`);
+      }
+    }
+    prevJobsRef.current = jobs;
+  }, [jobs]);
 
   const updateJob = useCallback((id: string, patch: Partial<BatchJob>) => {
     setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...patch } : j)));
@@ -41,7 +67,7 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
     async (jobId: string) => {
       try {
         updateJob(jobId, { progress: 15 });
-        const found = await runPipeline(20);
+        const found = await runPipeline(100);
         updateJob(jobId, {
           status: "completed",
           progress: 100,
@@ -74,6 +100,29 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
         }
 
         const found = await findCreators(urls.slice(0, 20));
+        updateJob(jobId, {
+          status: "completed",
+          progress: 100,
+          foundItems: found.length,
+          completedAt: new Date().toISOString(),
+        });
+        if (found.length > 0) onCreatorsFound(found);
+      } catch {
+        updateJob(jobId, { status: "failed", progress: 0 });
+      }
+    },
+    [onCreatorsFound, updateJob]
+  );
+
+  const runDeepScan = useCallback(
+    async (jobId: string) => {
+      try {
+        toast("Djupskanning startad", {
+          description: "Detta kan ta flera minuter. Hämta gärna en kopp kaffe under tiden.",
+          duration: 8000,
+        });
+        updateJob(jobId, { progress: 20 });
+        const found = await deepScan(20);
         updateJob(jobId, {
           status: "completed",
           progress: 100,
@@ -124,14 +173,15 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
 
       if (template.type === "google_serp") runGoogleSerp(job.id);
       else if (template.type === "aggregator_scrape") runAggregator(job.id);
+      else if (template.type === "dns_lookup") runDeepScan(job.id);
       else if (template.type === "manual_import") runManualImport(job.id);
     },
-    [runGoogleSerp, runAggregator, runManualImport]
+    [runGoogleSerp, runAggregator, runDeepScan, runManualImport]
   );
 
   const runAll = () => {
     setIsRunningAll(true);
-    const autoTemplates = batchTemplates.filter((t) => t.type !== "manual_import");
+    const autoTemplates = batchTemplates.filter((t) => t.type !== "manual_import" && t.type !== "dns_lookup");
     autoTemplates.forEach((t, i) => {
       setTimeout(() => startJob(t), i * 800);
     });

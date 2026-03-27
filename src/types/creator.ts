@@ -2,7 +2,7 @@ export interface Creator {
   id: string;
   name: string;
   company?: string;
-  platform: "Teachable" | "Kajabi" | "Thinkific" | "Podia" | "LearnWorlds" | "Annat";
+  platform: "Teachable" | "Kajabi" | "Thinkific" | "Podia" | "LearnWorlds" | "kurser.se" | "utbildning.se" | "Annat";
   url: string;
   subject: string;
   courseCount?: number;
@@ -14,6 +14,8 @@ export interface Creator {
   source: string;
   status: "ny" | "kontaktad" | "intresserad" | "ej_intresserad";
   addedAt: string;
+  leadScore?: number;
+  notes?: string;
 }
 
 export interface BatchJob {

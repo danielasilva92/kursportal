@@ -6,6 +6,7 @@ import { Sparkles, Loader2, Brain, Target, Database, ArrowRight } from "lucide-r
 
 interface AIInsightPanelProps {
   creator: Creator | null;
+  onNotesChange?: (id: string, notes: string) => void;
 }
 
 const badgeClasses: Record<"Låg" | "Medel" | "Hög", string> = {
@@ -14,7 +15,7 @@ const badgeClasses: Record<"Låg" | "Medel" | "Hög", string> = {
   Hög: "bg-emerald-50 text-emerald-700 border border-emerald-200",
 };
 
-export default function AIInsightPanel({ creator }: AIInsightPanelProps) {
+export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPanelProps) {
   const [analysis, setAnalysis] = useState<CreatorAIAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -186,6 +187,17 @@ export default function AIInsightPanel({ creator }: AIInsightPanelProps) {
           )}
         </div>
       )}
+
+      <section className="rounded-xl border border-border bg-background/70 p-4">
+        <p className="font-medium mb-2 text-sm">Anteckningar</p>
+        <textarea
+          className="w-full text-sm bg-transparent resize-none focus:outline-none text-muted-foreground placeholder:text-muted-foreground/40 leading-relaxed"
+          rows={3}
+          placeholder="Lägg till anteckningar..."
+          value={creator.notes ?? ""}
+          onChange={(e) => onNotesChange?.(creator.id, e.target.value)}
+        />
+      </section>
     </aside>
   );
 }

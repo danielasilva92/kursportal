@@ -7,6 +7,7 @@ import {
 
 import { convertCreatorsToCsv } from "../services/ExportService.js";
 import { analyzeCreatorWithAI } from "../services/aiAnalysisService.js";
+import { discoverViaWayback } from "../services/WaybackDiscoveryService.js";
 
 export async function scrapeUrl(req, res) {
   try {
@@ -40,7 +41,7 @@ export async function findCreators(req, res) {
   }
 }
 
-export async function discoverCreators(req, res) {
+export async function discoverCreators(_req, res) {
   try {
     const urls = await discoverCreatorUrls();
     res.json({ success: true, count: urls.length, urls });
@@ -67,7 +68,7 @@ export async function exportCsv(req, res) {
 
 export async function runPipeline(req, res) {
   try {
-    const limit = Math.min(Number(req.query.limit) || 20, 60);
+    const limit = Math.min(Number(req.query.limit) || 40, 60);
     const result = await runDiscoveryPipeline(limit);
 
     res.json({
@@ -80,6 +81,27 @@ export async function runPipeline(req, res) {
     });
   } catch (error) {
     res.status(500).json({ error: "Pipeline misslyckades", details: error?.message });
+  }
+}
+
+export async function runDeepScan(_req, res) {
+  try {
+    const waybackUrls = await discoverViaWayback().catch(() => []);
+    const allUrls = [...new Set(waybackUrls)];
+    const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 300);
+    console.log(`[deep-scan] scraper ${sample.length} av ${allUrls.length} URL:er`);
+    const creators = await findCreatorsFromUrls(sample);
+    const swedish = creators.filter((c) => c.likelySwedish === true);
+    console.log(`[deep-scan] ${swedish.length} svenska kreatörer hittade`);
+
+    res.json({
+      success: true,
+      discoveredCount: allUrls.length,
+      creatorsCount: swedish.length,
+      creators: swedish,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Djupskanning misslyckades", details: error?.message });
   }
 }
 
