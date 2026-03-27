@@ -61,6 +61,14 @@ const platformConfig: Record<string, { dot: string; badge: string }> = {
     dot: "bg-rose-400",
     badge: "bg-rose-50 text-rose-700 border border-rose-200",
   },
+  "kurser.se": {
+    dot: "bg-emerald-400",
+    badge: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  },
+  "utbildning.se": {
+    dot: "bg-cyan-400",
+    badge: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  },
   Annat: {
     dot: "bg-neutral-300",
     badge: "bg-neutral-50 text-neutral-600 border border-neutral-200",

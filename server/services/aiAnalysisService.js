@@ -69,13 +69,14 @@ Data om kreatören:
 ${JSON.stringify(creator, null, 2)}
 `;
 
-  const response = await client.responses.create({
+  const response = await client.chat.completions.create({
     model: process.env.OPENAI_MODEL || "gpt-4o",
-    input: prompt,
-    text: {
-      format: {
-        type: "json_schema",
+    messages: [{ role: "user", content: prompt }],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
         name: "creator_analysis",
+        strict: true,
         schema: {
           type: "object",
           properties: {
@@ -113,18 +114,18 @@ ${JSON.stringify(creator, null, 2)}
           ],
           additionalProperties: false,
         },
-        strict: true,
       },
     },
   });
 
-  if (!response.output_text) {
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
     throw new Error("AI returnerade inget svar");
   }
 
   let parsed;
   try {
-    parsed = JSON.parse(response.output_text);
+    parsed = JSON.parse(content);
   } catch {
     throw new Error("AI-svaret gick inte att tolka som JSON");
   }

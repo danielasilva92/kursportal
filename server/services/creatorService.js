@@ -8,6 +8,7 @@ import {
   normalizeUrl,
   detectPlatform,
 } from "../utils/Platform.js";
+import { discoverViaFacebookAds } from "./FacebookAdsService.js";
 
 const AGGREGATOR_SEEDS = [
   "https://www.kurser.se/kurser/distans",
@@ -15,32 +16,8 @@ const AGGREGATOR_SEEDS = [
   "https://www.utbildning.se/kurser/distansutbildningar",
 ];
 
-const GOOGLE_SERP_QUERIES = [
-  "https://www.google.com/search?q=site:teachable.com+svenska+kurser&num=30",
-  "https://www.google.com/search?q=site:thinkific.com+kurs+svenska&num=30",
-  "https://www.google.com/search?q=site:kajabi.com+kurser+svenska&num=30",
-  "https://www.google.com/search?q=site:podia.com+kurs+svenska&num=30",
-  "https://www.google.com/search?q=teachable.com+onlinekurs+swedish&num=30",
-  "https://www.google.com/search?q=kajabi+utbildning+svenska+kurser&num=30",
-];
 
-const KNOWN_CREATOR_SEEDS = [
-  "https://manusdiagnos.teachable.com",
-  "https://coaching-motivation.teachable.com",
-  "https://careerclarity.teachable.com",
-  "https://sensera.teachable.com",
-  "https://wsf-academy.thinkific.com",
-  "https://cirkular-ekonomi.teachable.com",
-  "https://beautyathome.thinkific.com",
-  "https://skrivakademin.teachable.com",
-  "https://fotografiskolan.teachable.com",
-  "https://ledarskapsgruppen.teachable.com",
-  "https://yogaflow.thinkific.com",
-  "https://kodkurser.teachable.com",
-  "https://digitalmarknadsföring.teachable.com",
-  "https://halsokurser.teachable.com",
-  "https://musikskolan.teachable.com",
-];
+const KNOWN_CREATOR_SEEDS = [];
 
 const AGGREGATOR_BLOCKED_HOSTS = [
   "press.kurser.se",
@@ -49,9 +26,26 @@ const AGGREGATOR_BLOCKED_HOSTS = [
   "utbildningsforetag.utbildning.se",
 ];
 
+function decodeDuckDuckGoUrl(url) {
+  try {
+    if (url.includes("duckduckgo.com/l/")) {
+      const uddg = new URL(url).searchParams.get("uddg");
+      if (uddg) return decodeURIComponent(uddg);
+    }
+  } catch {}
+  return url;
+}
+
 function extractUrls(markdown = "") {
   const raw = markdown.match(/https?:\/\/[^\s)"<\]\\']+/gi) || [];
-  return [...new Set(raw.map(normalizeUrl).filter((u) => u.length > 10))];
+  return [
+    ...new Set(
+      raw
+        .map(decodeDuckDuckGoUrl)
+        .map(normalizeUrl)
+        .filter((u) => u.length > 10)
+    ),
+  ];
 }
 
 function isCreatorPage(url) {
@@ -62,30 +56,32 @@ export async function discoverCreatorUrls() {
   const found = new Set(
     KNOWN_CREATOR_SEEDS.map(normalizeUrl).filter((u) => !isAggregatorOwnPage(u))
   );
+  console.log(`[discovery] seeds: ${found.size} URLs`);
 
   for (const seed of AGGREGATOR_SEEDS) {
     try {
       const page = await scrapePage(seed);
-      extractUrls(page.markdown)
-        .filter((u) => isCreatorPage(u) && !isAggregatorOwnPage(u))
-        .forEach((u) => found.add(u));
-    } catch {
-      continue;
+      const extracted = extractUrls(page.markdown).filter(
+        (u) => isCreatorPage(u) && !isAggregatorOwnPage(u)
+      );
+      extracted.forEach((u) => found.add(u));
+      console.log(`[discovery] aggregator ${seed} → ${extracted.length} URLs`);
+    } catch (err) {
+      console.log(`[discovery] aggregator ${seed} → FEL: ${err.message}`);
     }
   }
 
-  for (const serpUrl of GOOGLE_SERP_QUERIES) {
-    try {
-      const page = await scrapePage(serpUrl);
-      extractUrls(page.markdown)
-        .filter((u) => !isIgnored(u) && isPlatformCreatorUrl(u))
-        .forEach((u) => found.add(u));
-    } catch {
-      continue;
-    }
-  }
+  const facebookUrls = await discoverViaFacebookAds().catch(() => []);
+  console.log(`[discovery] facebook: ${facebookUrls.length} URLs`);
+  facebookUrls.filter((u) => !isIgnored(u)).forEach((u) => found.add(u));
 
-  return [...found].sort((a, b) => scoreUrl(b) - scoreUrl(a)).slice(0, 80);
+  console.log(`[discovery] totalt: ${found.size} URLs`);
+  const arr = [...found];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.sort((a, b) => scoreUrl(b) - scoreUrl(a)).slice(0, 80);
 }
 
 export async function scrapeAndBuildCreator(url) {
@@ -93,14 +89,16 @@ export async function scrapeAndBuildCreator(url) {
   return buildCreator(url, page.markdown || "", page.metadata || {});
 }
 
-function is404(creator) {
+function isJunkPage(creator) {
   const t = (creator.title || "").toLowerCase();
-  return (
-    t.includes("404") ||
-    t.includes("page not found") ||
-    t.includes("doesn't exist") ||
-    t.includes("not found")
-  );
+  const junkTitles = [
+    "404", "page not found", "doesn't exist", "not found",
+    "inloggning", "logga in", "sign in", "log in", "login",
+    "access denied", "forbidden", "unauthorized", "403",
+    "coming soon", "under construction", "maintenance",
+    "error", "oops", "något gick fel",
+  ];
+  return junkTitles.some((s) => t.includes(s));
 }
 
 function isAggregatorOwnPage(url = "") {
@@ -125,7 +123,7 @@ export async function findCreatorsFromUrls(urls) {
 
     try {
       const creator = await scrapeAndBuildCreator(url);
-      if (!is404(creator)) results.push(creator);
+      if (!isJunkPage(creator)) results.push(creator);
     } catch (error) {
       results.push({
         creatorName: "Okänd kreatör",

@@ -8,12 +8,15 @@ interface ExportButtonProps {
 
 const ExportButton = ({ creators }: ExportButtonProps) => {
   const exportCSV = () => {
+    const escape = (v: string | number) =>
+      `"${String(v).replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+
     const headers = ["Namn", "Företag", "Plattform", "URL", "Ämne", "Antal kurser", "Prissättning", "E-post", "Webb", "Sociala medier", "Räckvidd", "Källa", "Status", "Tillagd"];
     const rows = creators.map((c) => [
       c.name, c.company ?? "", c.platform, c.url, c.subject, c.courseCount ?? "", c.pricing ?? "",
       c.email ?? "", c.website ?? "", c.socialMedia ?? "", c.estimatedReach ?? "", c.source, c.status, c.addedAt,
     ]);
-    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
+    const csv = [headers, ...rows].map((r) => r.map(escape).join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

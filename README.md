@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Kursportal Prospekteringsverktyg
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ett verktyg som automatiskt hittar svenska kurskreatörer på internationella plattformar som Teachable, Kajabi och Thinkific. Resultatet visas i ett dashboard och kan exporteras som CSV.
 
-Currently, two official plugins are available:
+## Vad gör det?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Verktyget söker igenom plattformar och aggregatorsajter, skrapar kreatörernas sidor och samlar in kontaktuppgifter, prissättning, räckvidd med mera. En AI-analys kan sedan köras på varje kreatör för att bedöma lead-potential och ge ett förslag på outreach-vinkel.
 
-## React Compiler
+## Krav
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Du behöver ha installerat:
 
-## Expanding the ESLint configuration
+- Node.js (version 18 eller senare)
+- En OpenAI API-nyckel
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Kom igång
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Klona repot och installera beroenden för både frontend och backend.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Backend:**
+```bash
+cd kursportal/server
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Frontend:**
+```bash
+cd kursportal
+npm install
 ```
+
+Skapa en `.env`-fil i `kursportal/server/` med följande innehåll:
+
+```
+OPENAI_API_KEY=din_nyckel_här
+OPENAI_MODEL=gpt-4o
+PORT=5000
+FACEBOOK_ACCESS_TOKEN=valfritt_om_du_vill_använda_ads_library
+```
+
+## Starta
+
+Starta backend och frontend i varsin terminal.
+
+**Backend (port 5000):**
+```bash
+cd kursportal/server
+node index.js
+```
+
+**Frontend (port 5173):**
+```bash
+cd kursportal
+npm run dev
+```
+
+Öppna sedan `http://localhost:5173` i webbläsaren.
+
+## Användning
+
+**Batch-sökning** finns i panelen till vänster i dashboardet. Varje rad är en datakälla med en play-knapp. Klicka på "Kör alla" för att köra alla automatiska källor parallellt, eller starta enskilda sources manuellt.
+
+Tillgängliga datakällor:
+
+- **Google SERP och aggregatorsidor** kör hela discovery-flödet, skrapar kurser.se, utbildning.se och kör eventuellt Facebook Ads Library.
+- **Kurser.se och utbildning.se** kör enbart aggregator-skrapningen.
+- **Djupskanning** använder Wayback Machine CDX för att hitta Kajabi och Teachable-subdomäner och skrapar ett slumpmässigt urval. Det tar flera minuter.
+- **Manuell URL-import** låter dig klistra in egna URLs, en per rad, och skrapa dem direkt.
+
+En notis visas i gränssnittet och som webbläsarnotis när en sökning är klar.
+
+**AI-analys** kan köras på enskilda kreatörer via knappen "Analysera med AI" i sidopanelen. Du får en sammanfattning, en poäng för hur sannolikt det är att de riktar sig till svensk marknad, och ett förslag på hur man kan kontakta dem.
+
+**Exportera CSV** laddar ner alla kreatörer i tabellen som en CSV-fil som öppnas korrekt i Excel.
+
+## API-endpoints
+
+Alla endpoints nås på `http://localhost:5000/api`.
+
+| Endpoint | Metod | Beskrivning |
+|---|---|---|
+| `/run-pipeline` | GET | Kör hela flödet: discovery och skrapning |
+| `/discover-creators` | GET | Hämta URLs utan att skrapa dem |
+| `/find-creators` | POST | Skrapa en lista med URLs |
+| `/scrape` | POST | Skrapa en enskild URL |
+| `/analyze-creator` | POST | Kör AI-analys på en kreatör |
+| `/export-csv` | POST | Konvertera kreatörslista till CSV |
+| `/deep-scan` | GET | Wayback Machine-sökning efter plattformssubdomäner |
+
+## Driftsättning med Docker
+
+Projektet inkluderar en Dockerfile för driftsättning på till exempel Render. Puppeteer kräver Chromium som installeras i imagen.
+
+**Bygga och köra lokalt:**
+```bash
+docker build -t kursportal .
+docker run -p 5000:5000 --env-file kursportal/server/.env kursportal
+```
+
+**På Render:**
+
+1. Koppla repot till Render och välj "Docker" som runtime.
+2. Lägg till miljövariablerna `OPENAI_API_KEY`, `OPENAI_MODEL` och eventuellt `FACEBOOK_ACCESS_TOKEN` under "Environment".
+3. Render bygger och startar containern automatiskt vid varje push.
+
+Frontenden byggs som en del av Docker-bygget och serveras som statiska filer från Express på port 5000.

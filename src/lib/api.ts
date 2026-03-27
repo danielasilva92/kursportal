@@ -20,7 +20,7 @@ interface ApiCreator {
 }
 
 function mapToCreator(raw: ApiCreator, index: number): Creator {
-  const validPlatforms = ["Teachable", "Kajabi", "Thinkific", "Podia", "LearnWorlds"] as const;
+  const validPlatforms = ["Teachable", "Kajabi", "Thinkific", "Podia", "LearnWorlds", "kurser.se", "utbildning.se"] as const;
   const rawPlatform = raw.platform ?? "Annat";
   const platform = (validPlatforms as readonly string[]).includes(rawPlatform)
     ? (rawPlatform as Creator["platform"])
@@ -67,6 +67,15 @@ export async function findCreators(urls: string[]): Promise<Creator[]> {
     body: JSON.stringify({ urls }),
   });
   if (!res.ok) throw new Error(`find-creators misslyckades: ${res.status}`);
+  const data = await res.json();
+  return (data.creators ?? [])
+    .filter((c: ApiCreator & { likelySwedish?: boolean }) => c.likelySwedish !== false)
+    .map(mapToCreator);
+}
+
+export async function deepScan(limit = 20): Promise<Creator[]> {
+  const res = await fetch(`${BASE_URL}/api/deep-scan?limit=${limit}`);
+  if (!res.ok) throw new Error(`Djupskanning misslyckades: ${res.status}`);
   const data = await res.json();
   return (data.creators ?? [])
     .filter((c: ApiCreator & { likelySwedish?: boolean }) => c.likelySwedish !== false)

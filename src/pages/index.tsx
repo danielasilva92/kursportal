@@ -5,8 +5,8 @@ import StatsCards from "@/components/StatsCards";
 import BatchPanel from "@/components/BatchPanel";
 import CreatorTable from "@/components/CreatorTable";
 import ExportButton from "@/components/ExportButton";
-import { Search, Filter } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { Search, Filter, X } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef } from "react";
 import AIInsightPanel from "@/components/AIInsightPanel";
 
@@ -53,7 +53,7 @@ const Index = () => {
   const handleNewCreators = (newCreators: Creator[]) => {
     setCreators((prev) => {
       const existingUrls = new Set(prev.map((c) => c.url));
-      const unique = newCreators.filter((c) => !existingUrls.has(c.url));
+      const unique = newCreators.filter((c) => c.url && !existingUrls.has(c.url));
       return [...prev, ...unique];
     });
   };
@@ -179,6 +179,43 @@ const Index = () => {
     </div>
   </div>
 </main>
+
+      <AnimatePresence>
+        {selectedCreator && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40 xl:hidden"
+              onClick={() => setSelectedCreator(null)}
+            />
+            <motion.div
+              key="sheet"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 xl:hidden bg-background rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto"
+            >
+              <div className="sticky top-0 bg-background/90 backdrop-blur-sm flex items-center justify-between px-5 py-3 border-b border-border">
+                <div className="w-10 h-1 rounded-full bg-border mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
+                <span className="font-display font-semibold text-sm">AI-insikter</span>
+                <button
+                  onClick={() => setSelectedCreator(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-4">
+                <AIInsightPanel creator={selectedCreator} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

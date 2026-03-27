@@ -81,7 +81,7 @@ export function isPlatformCreatorUrl(url = "") {
 
   if (isCreatorSubdomain(url)) return true;
 
-  const hasCoursePath = /\/(courses?|c\/|p\/|products?\/|enroll\/)[a-z0-9\-_]+/i.test(url);
+  const hasCoursePath = /\/(courses?\/|c\/|p\/|products?\/|enroll\/)[a-z0-9\-_]+/i.test(url);
   return hasCoursePath;
 }
 
@@ -103,8 +103,15 @@ export function isAggregatorCreatorUrl(url = "") {
   ];
   if (BLOCKED.includes(lower)) return false;
 
+  const BLOCKED_EXACT_PATHS = [
+    "/kurser/distans",
+    "/kurser/online",
+    "/kurser/distansutbildningar",
+    "/kurser/distansutbildningar/",
+  ];
+  if (BLOCKED_EXACT_PATHS.some((p) => lower.endsWith(p) || lower.includes(p + "?"))) return false;
+
   const BLOCKED_PATHS = [
-    "/distans", "/online", "/distansutbildningar",
     "/review/", "/top/", "/hr-guiden",
     "/annonsera", "/referencias", "/referencer",
     "/om-oss", "/kontakt", "/press", "/blog",
@@ -126,6 +133,7 @@ export function scoreUrl(url = "") {
   if (isCreatorSubdomain(url)) score += 6;
   if (PLATFORM_DOMAINS.some((d) => url.toLowerCase().includes(d))) score += 3;
   if (/\/(courses?|p\/|products?\/)/.test(url)) score += 2;
+  if (url.toLowerCase().includes("kurser.se") || url.toLowerCase().includes("utbildning.se")) score += 4;
   if (url.toLowerCase().includes(".se")) score += 1;
   return score;
 }

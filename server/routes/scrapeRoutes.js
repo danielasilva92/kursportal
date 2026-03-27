@@ -4,8 +4,9 @@ import {
   findCreators,
   discoverCreators,
   exportCsv,
-   runPipeline,
-     analyzeCreator,
+  runPipeline,
+  analyzeCreator,
+  runDeepScan,
 } from "../controllers/ScrapeController.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get("/discover-creators", discoverCreators);
 router.post("/export-csv", exportCsv);
 router.get("/run-pipeline", runPipeline);
 router.post("/analyze-creator", analyzeCreator);
+router.get("/deep-scan", runDeepScan);
 
 export default router;
