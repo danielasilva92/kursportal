@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import scrapeRoutes from "./routes/ScrapeRoutes.js";
+import scrapeRoutes from "./routes/scrapeRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
