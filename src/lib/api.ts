@@ -1,7 +1,7 @@
 import type { Creator } from "@/types/creator";
 import type { CreatorAIAnalysis } from "@/types/ai";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 interface ApiCreator {
   creatorName?: string;
