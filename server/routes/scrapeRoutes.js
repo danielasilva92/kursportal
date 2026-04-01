@@ -18,6 +18,7 @@ const generalLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   message: { error: "För många förfrågningar, försök igen om en minut." },
 });
 
@@ -27,6 +28,7 @@ const heavyLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   message: { error: "För många tunga förfrågningar, försök igen om en minut." },
 });
 

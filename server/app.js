@@ -11,6 +11,9 @@ dotenv.config();
 
 const app = express();
 
+// Behövs för att rate limiting ska fungera bakom Renders proxy
+app.set("trust proxy", 1);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
   : ["http://localhost:5173"];
