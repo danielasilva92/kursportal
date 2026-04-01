@@ -4,7 +4,6 @@ import { normalizeUrl, isPlatformCreatorUrl } from "../utils/Platform.js";
 const PLATFORM_PATTERNS = [
   "*.teachable.com",
   "*.mykajabi.com",
-  "*.thinkific.com",
 ];
 
 const IGNORED_SUBDOMAINS = [
@@ -37,12 +36,14 @@ async function fetchCdxUrls(pattern) {
     `&from=20230101` +
     `&limit=100`;
 
-  const response = await axios.get(apiUrl, { timeout: 25000 });
+  const response = await axios.get(apiUrl, { timeout: 45000 });
   const rows = response.data;
 
   if (!Array.isArray(rows) || rows.length < 2) {
+    console.log(`[wayback] ${pattern} → 0 rader`);
     return [];
   }
+  console.log(`[wayback] ${pattern} → ${rows.length - 1} rader`);
 
   const seen = new Set();
   const bases = [];
