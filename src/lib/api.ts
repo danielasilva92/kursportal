@@ -6,7 +6,7 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 120_000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
-  return fetchWithTimeout(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
 }
 
 interface ApiCreator {
