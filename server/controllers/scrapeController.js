@@ -122,7 +122,7 @@ export async function exportCsv(req, res) {
 
 export async function runPipeline(req, res) {
   try {
-    const limit = Math.min(Number(req.query.limit) || 40, 60);
+    const limit = Math.min(Number(req.query.limit) || 20, 25);
     const result = await runDiscoveryPipeline(limit);
 
     res.json({
@@ -144,7 +144,7 @@ export async function runDeepScan(_req, res) {
   try {
     const waybackUrls = await discoverViaWayback().catch(() => []);
     const allUrls = [...new Set(waybackUrls)];
-    const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 300);
+    const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 50);
     const creators = await findCreatorsFromUrls(sample);
     const swedish = creators.filter((c) => c.likelySwedish === true);
 

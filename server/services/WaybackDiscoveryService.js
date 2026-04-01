@@ -37,7 +37,7 @@ async function fetchCdxUrls(pattern) {
     `&fl=original` +
     `&collapse=urlkey` +
     `&from=20230101` +
-    `&limit=5000`;
+    `&limit=500`;
 
   const response = await axios.get(apiUrl, { timeout: 180000 });
   const rows = response.data;
