@@ -75,7 +75,17 @@ async function scrapeStatic(url) {
 async function scrapeDynamic(url) {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--disable-extensions",
+      "--disable-background-networking",
+      "--disable-default-apps",
+      "--no-first-run",
+      "--single-process",
+    ],
   });
   try {
     const page = await browser.newPage();
