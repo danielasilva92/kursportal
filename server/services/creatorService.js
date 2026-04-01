@@ -108,35 +108,42 @@ function isAggregatorOwnPage(url = "") {
 export async function findCreatorsFromUrls(urls) {
   const results = [];
   const seen = new Set();
+  const CONCURRENCY = 3;
 
-  for (const rawUrl of urls) {
-    const url = normalizeUrl(rawUrl);
-    if (seen.has(url)) continue;
-    seen.add(url);
+  const dedupedUrls = [...new Set(
+    urls.map(normalizeUrl).filter((u) => u && !isAggregatorOwnPage(u))
+  )];
 
-    if (isAggregatorOwnPage(url)) continue;
+  for (let i = 0; i < dedupedUrls.length; i += CONCURRENCY) {
+    const batch = dedupedUrls.slice(i, i + CONCURRENCY).filter((u) => !seen.has(u));
+    batch.forEach((u) => seen.add(u));
 
-    try {
-      const creator = await scrapeAndBuildCreator(url);
-      if (!isJunkPage(creator)) results.push(creator);
-    } catch (error) {
-      results.push({
-        creatorName: "Okänd kreatör",
-        platform: detectPlatform(url),
-        courseUrl: url,
-        subject: "Övrigt",
-        courseCount: null,
-        pricing: [],
-        contact: { website: url, emails: [], socials: [] },
-        estimatedReach: null,
-        dataSource: detectPlatform(url),
-        language: null,
-        title: "",
-        description: "",
-        likelySwedish: false,
-        leadScore: 0,
-        error: error?.message || "Skrapning misslyckades",
-      });
+    const settled = await Promise.allSettled(batch.map((url) => scrapeAndBuildCreator(url)));
+
+    for (let j = 0; j < settled.length; j++) {
+      const outcome = settled[j];
+      const url = batch[j];
+      if (outcome.status === "fulfilled") {
+        if (!isJunkPage(outcome.value)) results.push(outcome.value);
+      } else {
+        results.push({
+          creatorName: "Okänd kreatör",
+          platform: detectPlatform(url),
+          courseUrl: url,
+          subject: "Övrigt",
+          courseCount: null,
+          pricing: [],
+          contact: { website: url, emails: [], socials: [] },
+          estimatedReach: null,
+          dataSource: detectPlatform(url),
+          language: null,
+          title: "",
+          description: "",
+          likelySwedish: false,
+          leadScore: 0,
+          error: outcome.reason?.message || "Skrapning misslyckades",
+        });
+      }
     }
   }
 

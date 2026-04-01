@@ -67,7 +67,7 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
     async (jobId: string) => {
       try {
         updateJob(jobId, { progress: 15 });
-        const found = await runPipeline(20);
+        const found = await runPipeline(40);
         updateJob(jobId, {
           status: "completed",
           progress: 100,
