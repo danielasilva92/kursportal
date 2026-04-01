@@ -29,14 +29,18 @@ cd kursportal
 npm install
 ```
 
-Skapa en `.env`-fil i `kursportal/server/` med följande innehåll:
+Skapa en `.env`-fil i `kursportal/server/` (se `.env.example` som mall):
 
 ```
 OPENAI_API_KEY=din_nyckel_här
 OPENAI_MODEL=gpt-4o
 PORT=5000
+ALLOWED_ORIGINS=http://localhost:5173
 FACEBOOK_ACCESS_TOKEN=valfritt_om_du_vill_använda_ads_library
+BING_API_KEY=valfritt_för_bing_sökning
 ```
+
+> **OBS:** Committa aldrig `.env` till Git — filen är gitignorerad.
 
 ## Starta
 
@@ -81,11 +85,14 @@ Alla endpoints nås på `http://localhost:5000/api`.
 |---|---|---|
 | `/run-pipeline` | GET | Kör hela flödet: discovery och skrapning |
 | `/discover-creators` | GET | Hämta URLs utan att skrapa dem |
-| `/find-creators` | POST | Skrapa en lista med URLs |
+| `/find-creators` | POST | Skrapa en lista med URLs (max 200) |
 | `/scrape` | POST | Skrapa en enskild URL |
 | `/analyze-creator` | POST | Kör AI-analys på en kreatör |
 | `/export-csv` | POST | Konvertera kreatörslista till CSV |
 | `/deep-scan` | GET | Wayback Machine-sökning efter plattformssubdomäner |
+| `/health` | GET | Hälsokontroll (returnerar `{"status":"ok"}`) |
+
+> **Rate limiting:** Max 60 anrop/minut generellt. Tunga endpoints (`/run-pipeline`, `/deep-scan`, `/analyze-creator`) är begränsade till 5 anrop/minut.
 
 ## Driftsättning med Docker
 
@@ -100,7 +107,7 @@ docker run -p 5000:5000 --env-file kursportal/server/.env kursportal
 **På Render:**
 
 1. Koppla repot till Render och välj "Docker" som runtime.
-2. Lägg till miljövariablerna `OPENAI_API_KEY`, `OPENAI_MODEL` och eventuellt `FACEBOOK_ACCESS_TOKEN` under "Environment".
+2. Lägg till miljövariablerna `OPENAI_API_KEY`, `OPENAI_MODEL`, `ALLOWED_ORIGINS` (din Render-URL) och eventuellt `FACEBOOK_ACCESS_TOKEN` under "Environment".
 3. Render bygger och startar containern automatiskt vid varje push.
 
 Frontenden byggs som en del av Docker-bygget och serveras som statiska filer från Express på port 5000.
