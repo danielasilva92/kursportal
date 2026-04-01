@@ -3,10 +3,8 @@ import { normalizeUrl, isPlatformCreatorUrl } from "../utils/Platform.js";
 
 const PLATFORM_PATTERNS = [
   "*.teachable.com",
-  "*.thinkific.com",
   "*.mykajabi.com",
-  "*.podia.com",
-  "*.learnworlds.com",
+  "*.thinkific.com",
 ];
 
 const IGNORED_SUBDOMAINS = [
@@ -37,9 +35,9 @@ async function fetchCdxUrls(pattern) {
     `&fl=original` +
     `&collapse=urlkey` +
     `&from=20230101` +
-    `&limit=500`;
+    `&limit=100`;
 
-  const response = await axios.get(apiUrl, { timeout: 180000 });
+  const response = await axios.get(apiUrl, { timeout: 25000 });
   const rows = response.data;
 
   if (!Array.isArray(rows) || rows.length < 2) {

@@ -144,7 +144,7 @@ export async function runDeepScan(_req, res) {
   try {
     const waybackUrls = await discoverViaWayback().catch(() => []);
     const allUrls = [...new Set(waybackUrls)];
-    const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 50);
+    const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 20);
     const creators = await findCreatorsFromUrls(sample);
     const swedish = creators.filter((c) => c.likelySwedish === true);
 
