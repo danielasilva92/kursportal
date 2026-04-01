@@ -17,7 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "json2csv": "^6.0.0-alpha.2",
+    "express-rate-limit": "^7.5.0",
     "openai": "^6.32.0",
     "puppeteer": "^24.40.0"
   }

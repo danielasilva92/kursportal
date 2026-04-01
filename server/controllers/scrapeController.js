@@ -9,10 +9,56 @@ import { convertCreatorsToCsv } from "../services/exportService.js";
 import { analyzeCreatorWithAI } from "../services/aiAnalysisService.js";
 import { discoverViaWayback } from "../services/WaybackDiscoveryService.js";
 
+const BLOCKED_HOSTS = [
+  "localhost",
+  "127.",
+  "0.0.0.0",
+  "::1",
+  "169.254.",
+  "10.",
+  "192.168.",
+  "172.16.",
+  "172.17.",
+  "172.18.",
+  "172.19.",
+  "172.20.",
+  "172.21.",
+  "172.22.",
+  "172.23.",
+  "172.24.",
+  "172.25.",
+  "172.26.",
+  "172.27.",
+  "172.28.",
+  "172.29.",
+  "172.30.",
+  "172.31.",
+];
+
+function validateUrl(raw) {
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { ok: false, message: "Ogiltig URL" };
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    return { ok: false, message: "Endast http och https är tillåtna" };
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (BLOCKED_HOSTS.some((b) => host === b || host.startsWith(b))) {
+    return { ok: false, message: "URL pekar på en intern adress" };
+  }
+  return { ok: true };
+}
+
 export async function scrapeUrl(req, res) {
   try {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: "URL saknas" });
+
+    const check = validateUrl(url);
+    if (!check.ok) return res.status(400).json({ error: check.message });
 
     const creator = await scrapeAndBuildCreator(url);
     res.json({ success: true, creator });
@@ -26,6 +72,14 @@ export async function findCreators(req, res) {
     const { urls } = req.body;
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       return res.status(400).json({ error: "urls måste vara en array med minst ett värde" });
+    }
+    if (urls.length > 200) {
+      return res.status(400).json({ error: "Max 200 URL:er per anrop" });
+    }
+
+    for (const url of urls) {
+      const check = validateUrl(url);
+      if (!check.ok) return res.status(400).json({ error: `Ogiltig URL "${url}": ${check.message}` });
     }
 
     const results = await findCreatorsFromUrls(urls);
@@ -89,10 +143,8 @@ export async function runDeepScan(_req, res) {
     const waybackUrls = await discoverViaWayback().catch(() => []);
     const allUrls = [...new Set(waybackUrls)];
     const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 300);
-    console.log(`[deep-scan] scraper ${sample.length} av ${allUrls.length} URL:er`);
     const creators = await findCreatorsFromUrls(sample);
     const swedish = creators.filter((c) => c.likelySwedish === true);
-    console.log(`[deep-scan] ${swedish.length} svenska kreatörer hittade`);
 
     res.json({
       success: true,

@@ -47,10 +47,7 @@ function extractCreatorUrls(ads = []) {
 
 export async function discoverViaFacebookAds() {
   const token = process.env.FACEBOOK_ACCESS_TOKEN;
-  if (!token) {
-    console.log("FACEBOOK_ACCESS_TOKEN saknas, hoppar över Facebook Ads-discovery.");
-    return [];
-  }
+  if (!token) return [];
 
   const found = new Set();
 
@@ -75,10 +72,7 @@ export async function discoverViaFacebookAds() {
       extractCreatorUrls(ads).forEach((url) => found.add(url));
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 401 || status === 403) {
-        console.warn("Facebook Ads API: ogiltig eller utgången access token.");
-        break;
-      }
+      if (status === 401 || status === 403) break;
       continue;
     }
   }

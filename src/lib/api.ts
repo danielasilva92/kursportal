@@ -3,6 +3,12 @@ import type { CreatorAIAnalysis } from "@/types/ai";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
+function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 120_000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  return fetchWithTimeout(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
 interface ApiCreator {
   creatorName?: string;
   platform?: string;
@@ -47,7 +53,7 @@ function mapToCreator(raw: ApiCreator, index: number): Creator {
 }
 
 export async function runPipeline(limit = 20): Promise<Creator[]> {
-  const res = await fetch(`${BASE_URL}/api/run-pipeline?limit=${limit}`);
+  const res = await fetchWithTimeout(`${BASE_URL}/api/run-pipeline?limit=${limit}`);
   if (!res.ok) throw new Error(`Pipeline misslyckades: ${res.status}`);
   const data = await res.json();
   return (data.creators ?? [])
@@ -56,14 +62,14 @@ export async function runPipeline(limit = 20): Promise<Creator[]> {
 }
 
 export async function discoverUrls(): Promise<string[]> {
-  const res = await fetch(`${BASE_URL}/api/discover-creators`);
+  const res = await fetchWithTimeout(`${BASE_URL}/api/discover-creators`);
   if (!res.ok) throw new Error(`Discovery misslyckades: ${res.status}`);
   const data = await res.json();
   return data.urls ?? [];
 }
 
 export async function findCreators(urls: string[]): Promise<Creator[]> {
-  const res = await fetch(`${BASE_URL}/api/find-creators`, {
+  const res = await fetchWithTimeout(`${BASE_URL}/api/find-creators`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ urls }),
@@ -76,7 +82,7 @@ export async function findCreators(urls: string[]): Promise<Creator[]> {
 }
 
 export async function deepScan(limit = 20): Promise<Creator[]> {
-  const res = await fetch(`${BASE_URL}/api/deep-scan?limit=${limit}`);
+  const res = await fetchWithTimeout(`${BASE_URL}/api/deep-scan?limit=${limit}`);
   if (!res.ok) throw new Error(`Djupskanning misslyckades: ${res.status}`);
   const data = await res.json();
   return (data.creators ?? [])
@@ -85,7 +91,7 @@ export async function deepScan(limit = 20): Promise<Creator[]> {
 }
 
 export async function analyzeCreator(creator: Creator): Promise<CreatorAIAnalysis> {
-  const res = await fetch(`${BASE_URL}/api/analyze-creator`, {
+  const res = await fetchWithTimeout(`${BASE_URL}/api/analyze-creator`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

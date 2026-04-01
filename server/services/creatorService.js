@@ -56,7 +56,6 @@ export async function discoverCreatorUrls() {
   const found = new Set(
     KNOWN_CREATOR_SEEDS.map(normalizeUrl).filter((u) => !isAggregatorOwnPage(u))
   );
-  console.log(`[discovery] seeds: ${found.size} URLs`);
 
   for (const seed of AGGREGATOR_SEEDS) {
     try {
@@ -65,17 +64,13 @@ export async function discoverCreatorUrls() {
         (u) => isCreatorPage(u) && !isAggregatorOwnPage(u)
       );
       extracted.forEach((u) => found.add(u));
-      console.log(`[discovery] aggregator ${seed} → ${extracted.length} URLs`);
-    } catch (err) {
-      console.log(`[discovery] aggregator ${seed} → FEL: ${err.message}`);
+    } catch {
+      // fortsätter med nästa seed vid fel
     }
   }
 
   const facebookUrls = await discoverViaFacebookAds().catch(() => []);
-  console.log(`[discovery] facebook: ${facebookUrls.length} URLs`);
   facebookUrls.filter((u) => !isIgnored(u)).forEach((u) => found.add(u));
-
-  console.log(`[discovery] totalt: ${found.size} URLs`);
   const arr = [...found];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

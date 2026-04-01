@@ -41,10 +41,7 @@ async function bingSearch(query, apiKey) {
 
 export async function discoverViaBing() {
   const apiKey = process.env.BING_API_KEY;
-  if (!apiKey) {
-    console.log("[bing] BING_API_KEY saknas, hoppar över Bing-sökning.");
-    return [];
-  }
+  if (!apiKey) return [];
 
   const found = new Set();
 
@@ -52,12 +49,10 @@ export async function discoverViaBing() {
     try {
       const urls = await bingSearch(query, apiKey);
       urls.forEach((u) => found.add(u));
-      console.log(`[bing] "${query}" → ${urls.length} URLs`);
-    } catch (err) {
-      console.log(`[bing] "${query}" → FEL: ${err.message}`);
+    } catch {
+      // fortsätter med nästa sökning vid fel
     }
   }
 
-  console.log(`[bing] totalt: ${found.size} plattforms-URLs hittade`);
   return [...found];
 }

@@ -43,11 +43,8 @@ async function fetchCdxUrls(pattern) {
   const rows = response.data;
 
   if (!Array.isArray(rows) || rows.length < 2) {
-    console.log(`[wayback] ${pattern} → CDX returnerade 0 rader`);
     return [];
   }
-
-  console.log(`[wayback] ${pattern} → CDX returnerade ${rows.length - 1} rader`);
 
   const seen = new Set();
   const bases = [];
@@ -78,9 +75,8 @@ export async function discoverViaWayback() {
       try {
         const urls = await fetchCdxUrls(pattern);
         urls.forEach((u) => found.add(u));
-        console.log(`[wayback] ${pattern} → ${urls.length} subdomäner`);
-      } catch (err) {
-        console.log(`[wayback] ${pattern} → FEL: ${err.message}`);
+      } catch {
+        // fortsätter med nästa mönster vid fel
       }
     })
   );

@@ -1,4 +1,16 @@
-import { Parser } from "json2csv";
+const FIELDS = [
+  "creatorName", "platform", "courseUrl", "subject", "courseCount",
+  "pricing", "website", "emails", "socials", "estimatedReach",
+  "dataSource", "language", "title", "description", "likelySwedish", "leadScore",
+];
+
+function escapeCsvField(value) {
+  const str = String(value ?? "");
+  if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
 
 function flatten(creator) {
   return {
@@ -21,13 +33,11 @@ function flatten(creator) {
   };
 }
 
-const FIELDS = [
-  "creatorName", "platform", "courseUrl", "subject", "courseCount",
-  "pricing", "website", "emails", "socials", "estimatedReach",
-  "dataSource", "language", "title", "description", "likelySwedish", "leadScore",
-];
-
 export function convertCreatorsToCsv(creators) {
-  const parser = new Parser({ fields: FIELDS });
-  return parser.parse(creators.map(flatten));
+  const header = FIELDS.map(escapeCsvField).join(",");
+  const rows = creators.map((c) => {
+    const flat = flatten(c);
+    return FIELDS.map((f) => escapeCsvField(flat[f])).join(",");
+  });
+  return [header, ...rows].join("\n");
 }
