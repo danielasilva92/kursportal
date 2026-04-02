@@ -29,7 +29,7 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
   const prevJobsRef = useRef<BatchJob[]>([]);
 
   useEffect(() => {
-    if (Notification.permission === "default") {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
@@ -40,7 +40,7 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
       if (prev?.status === "running" && job.status === "completed") {
         const msg = `${job.label}: ${job.foundItems} kreatörer hittade`;
         toast.success(msg);
-        if (Notification.permission === "granted") {
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
           new Notification("Sökning klar", { body: msg, icon: "/favicon.ico" });
         }
       } else if (prev?.status === "running" && job.status === "failed") {
