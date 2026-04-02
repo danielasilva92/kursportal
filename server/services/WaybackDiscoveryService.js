@@ -40,10 +40,8 @@ async function fetchCdxUrls(pattern) {
   const rows = response.data;
 
   if (!Array.isArray(rows) || rows.length < 2) {
-    console.log(`[wayback] ${pattern} → 0 rader`);
     return [];
   }
-  console.log(`[wayback] ${pattern} → ${rows.length - 1} rader`);
 
   const seen = new Set();
   const bases = [];

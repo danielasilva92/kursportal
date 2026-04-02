@@ -67,9 +67,8 @@ async function searchSwedishDomains() {
         } catch {}
       });
 
-      console.log(`[dns] DDG "${q}" → ${hosts.size} .se-domäner hittills`);
-    } catch (err) {
-      console.log(`[dns] DDG "${q}" → FEL: ${err.message}`);
+    } catch {
+      // fortsätter med nästa sökning
     }
   }
 
@@ -91,17 +90,12 @@ async function cnamePoinsToPlatform(hostname) {
 
 export async function discoverViaDns() {
   const candidateHosts = await searchSwedishDomains();
-  console.log(`[dns] kontrollerar CNAME för ${candidateHosts.length} .se-domäner`);
-
   const found = [];
   for (const hostname of candidateHosts) {
     const usesPlatform = await cnamePoinsToPlatform(hostname);
     if (usesPlatform) {
       found.push(normalizeUrl(`https://${hostname}`));
-      console.log(`[dns] hittad: ${hostname}`);
     }
   }
-
-  console.log(`[dns] totalt: ${found.length} svenska plattforms-domäner`);
   return found;
 }

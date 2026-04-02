@@ -135,13 +135,11 @@ export async function runPipeline(req, res) {
       creators: result.creators,
     });
   } catch (error) {
-    console.error("[pipeline] fel:", error?.message, error?.stack);
     res.status(500).json({ error: "Pipeline misslyckades", details: error?.message });
   }
 }
 
 export async function runDeepScan(_req, res) {
-  console.log("[deep-scan] startar");
   try {
     const [waybackUrls, aggregatorUrls] = await Promise.all([
       discoverViaWayback().catch(() => []),
@@ -159,7 +157,6 @@ export async function runDeepScan(_req, res) {
       creators: swedish,
     });
   } catch (error) {
-    console.error("[deep-scan] fel:", error?.message, error?.stack);
     res.status(500).json({ error: "Djupskanning misslyckades", details: error?.message });
   }
 }
