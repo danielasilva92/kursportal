@@ -101,7 +101,7 @@ export const reducer = (state: State, action: Action): State => {
                 ...t,
                 open: false,
               }
-            : t,
+            : t
         ),
       };
     }
@@ -148,7 +148,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open : boolean) => {
+      onOpenChange: (open: boolean) => {
         if (!open) dismiss();
       },
     },

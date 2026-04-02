@@ -8,19 +8,43 @@ export const PLATFORM_DOMAINS = [
 ];
 
 const MARKETING_PATHS = [
-  "/features", "/pricing", "/blog", "/about", "/contact",
-  "/login", "/signup", "/register", "/support", "/legal",
-  "/terms", "/privacy", "/careers", "/press", "/partners",
-  "/browse", "/creators", "/examples", "/templates",
-  "/podcasts/", "/feed", "/affiliate",
+  "/features",
+  "/pricing",
+  "/blog",
+  "/about",
+  "/contact",
+  "/login",
+  "/signup",
+  "/register",
+  "/support",
+  "/legal",
+  "/terms",
+  "/privacy",
+  "/careers",
+  "/press",
+  "/partners",
+  "/browse",
+  "/creators",
+  "/examples",
+  "/templates",
+  "/podcasts/",
+  "/feed",
+  "/affiliate",
 ];
 
 const IGNORED_EXTENSIONS = /\.(jpg|jpeg|png|webp|gif|svg|pdf|zip|mp4|mp3)(\?|$)/i;
 
 const IGNORED_DOMAINS = [
-  "facebook.com", "instagram.com", "linkedin.com", "youtube.com",
-  "tiktok.com", "twitter.com", "x.com", "cloudinary.com",
-  "translate.google.com", "google.com/search",
+  "facebook.com",
+  "instagram.com",
+  "linkedin.com",
+  "youtube.com",
+  "tiktok.com",
+  "twitter.com",
+  "x.com",
+  "cloudinary.com",
+  "translate.google.com",
+  "google.com/search",
 ];
 
 export function detectPlatform(url = "") {
@@ -97,10 +121,7 @@ export function isAggregatorCreatorUrl(url = "") {
 
   if (!isAgg) return false;
 
-  const BLOCKED = [
-    "https://www.kurser.se",
-    "https://www.utbildning.se",
-  ];
+  const BLOCKED = ["https://www.kurser.se", "https://www.utbildning.se"];
   if (BLOCKED.includes(lower)) return false;
 
   const BLOCKED_EXACT_PATHS = [
@@ -112,10 +133,18 @@ export function isAggregatorCreatorUrl(url = "") {
   if (BLOCKED_EXACT_PATHS.some((p) => lower.endsWith(p) || lower.includes(p + "?"))) return false;
 
   const BLOCKED_PATHS = [
-    "/review/", "/top/", "/hr-guiden",
-    "/annonsera", "/referencias", "/referencer",
-    "/om-oss", "/kontakt", "/press", "/blog",
-    "/logga-in", "/registrera",
+    "/review/",
+    "/top/",
+    "/hr-guiden",
+    "/annonsera",
+    "/referencias",
+    "/referencer",
+    "/om-oss",
+    "/kontakt",
+    "/press",
+    "/blog",
+    "/logga-in",
+    "/registrera",
   ];
   if (BLOCKED_PATHS.some((p) => lower.includes(p))) return false;
 
@@ -133,7 +162,8 @@ export function scoreUrl(url = "") {
   if (isCreatorSubdomain(url)) score += 6;
   if (PLATFORM_DOMAINS.some((d) => url.toLowerCase().includes(d))) score += 3;
   if (/\/(courses?|p\/|products?\/)/.test(url)) score += 2;
-  if (url.toLowerCase().includes("kurser.se") || url.toLowerCase().includes("utbildning.se")) score += 4;
+  if (url.toLowerCase().includes("kurser.se") || url.toLowerCase().includes("utbildning.se"))
+    score += 4;
   if (url.toLowerCase().includes(".se")) score += 1;
   return score;
 }
@@ -144,6 +174,9 @@ export function normalizeUrl(url = "") {
     parsed.hash = "";
     return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, "");
   } catch {
-    return url.trim().replace(/[),.>\]"']+$/, "").replace(/\/+$/, "");
+    return url
+      .trim()
+      .replace(/[),.>\]"']+$/, "")
+      .replace(/\/+$/, "");
   }
 }

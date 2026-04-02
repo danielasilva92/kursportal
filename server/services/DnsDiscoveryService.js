@@ -66,7 +66,6 @@ async function searchSwedishDomains() {
           }
         } catch {}
       });
-
     } catch {
       // fortsätter med nästa sökning
     }
@@ -79,9 +78,7 @@ async function cnamePoinsToPlatform(hostname) {
   try {
     const cnames = await dns.resolveCname(hostname);
     return cnames.some((cname) =>
-      PLATFORM_CNAME_PATTERNS.some((pattern) =>
-        cname.toLowerCase().includes(pattern)
-      )
+      PLATFORM_CNAME_PATTERNS.some((pattern) => cname.toLowerCase().includes(pattern))
     );
   } catch {
     return false;

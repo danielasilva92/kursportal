@@ -16,15 +16,40 @@ const ExportButton = ({ creators, selectedIds }: ExportButtonProps) => {
       `"${String(v).replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
 
     const headers = [
-      "Namn", "Företag", "Plattform", "URL", "Ämne", "Antal kurser",
-      "Prissättning", "E-post", "Webb", "Sociala medier", "Räckvidd",
-      "Källa", "Status", "Score", "Anteckningar", "Tillagd",
+      "Namn",
+      "Företag",
+      "Plattform",
+      "URL",
+      "Ämne",
+      "Antal kurser",
+      "Prissättning",
+      "E-post",
+      "Webb",
+      "Sociala medier",
+      "Räckvidd",
+      "Källa",
+      "Status",
+      "Score",
+      "Anteckningar",
+      "Tillagd",
     ];
     const rows = toExport.map((c) => [
-      c.name, c.company ?? "", c.platform, c.url, c.subject,
-      c.courseCount ?? "", c.pricing ?? "", c.email ?? "", c.website ?? "",
-      c.socialMedia ?? "", c.estimatedReach ?? "", c.source, c.status,
-      c.leadScore ?? "", c.notes ?? "", c.addedAt,
+      c.name,
+      c.company ?? "",
+      c.platform,
+      c.url,
+      c.subject,
+      c.courseCount ?? "",
+      c.pricing ?? "",
+      c.email ?? "",
+      c.website ?? "",
+      c.socialMedia ?? "",
+      c.estimatedReach ?? "",
+      c.source,
+      c.status,
+      c.leadScore ?? "",
+      c.notes ?? "",
+      c.addedAt,
     ]);
     const csv = [headers, ...rows].map((r) => r.map(escape).join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });

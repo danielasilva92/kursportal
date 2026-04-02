@@ -8,7 +8,12 @@ interface StatsCardsProps {
   interested: number;
 }
 
-const StatsCards = ({ totalCreators, platformBreakdown, contacted, interested }: StatsCardsProps) => {
+const StatsCards = ({
+  totalCreators,
+  platformBreakdown,
+  contacted,
+  interested,
+}: StatsCardsProps) => {
   const stats = [
     { label: "Hittade kreatörer", value: totalCreators, icon: Users },
     { label: "Plattformar", value: Object.keys(platformBreakdown).length, icon: Search },
@@ -28,7 +33,10 @@ const StatsCards = ({ totalCreators, platformBreakdown, contacted, interested }:
           className="glass-card rounded-lg p-5 cursor-default"
         >
           <div className="flex items-center justify-between mb-3">
-            <motion.div whileHover={{ rotate: 12, scale: 1.15 }} transition={{ type: "spring", stiffness: 300 }}>
+            <motion.div
+              whileHover={{ rotate: 12, scale: 1.15 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
               <stat.icon className="w-5 h-5 text-mauve" />
             </motion.div>
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">

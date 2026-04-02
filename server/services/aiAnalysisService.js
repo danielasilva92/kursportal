@@ -28,14 +28,12 @@ function sanitizeCreator(creator = {}) {
     pricing: creator.pricing ?? "",
     email: creator.email ?? creator.contact?.emails?.[0] ?? "",
     website: creator.website ?? creator.contact?.website ?? "",
-    socialMedia:
-      creator.socialMedia ?? creator.contact?.socials?.join(", ") ?? "",
+    socialMedia: creator.socialMedia ?? creator.contact?.socials?.join(", ") ?? "",
     estimatedReach: creator.estimatedReach ?? "",
     source: creator.source ?? creator.dataSource ?? "Okänd källa",
     description: creator.description ?? "",
     title: creator.title ?? "",
-    likelySwedish:
-      typeof creator.likelySwedish === "boolean" ? creator.likelySwedish : null,
+    likelySwedish: typeof creator.likelySwedish === "boolean" ? creator.likelySwedish : null,
   };
 }
 
@@ -132,10 +130,7 @@ ${JSON.stringify(creator, null, 2)}
 
   return {
     summary: parsed.summary ?? "Ingen sammanfattning tillgänglig.",
-    swedishMarketScore: Math.max(
-      0,
-      Math.min(100, Number(parsed.swedishMarketScore ?? 0))
-    ),
+    swedishMarketScore: Math.max(0, Math.min(100, Number(parsed.swedishMarketScore ?? 0))),
     leadPotential: ["Låg", "Medel", "Hög"].includes(parsed.leadPotential)
       ? parsed.leadPotential
       : "Medel",

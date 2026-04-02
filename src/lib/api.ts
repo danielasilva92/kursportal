@@ -3,7 +3,11 @@ import type { CreatorAIAnalysis } from "@/types/ai";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
-function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 300_000): Promise<Response> {
+function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs = 300_000
+): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
@@ -27,7 +31,15 @@ interface ApiCreator {
 }
 
 function mapToCreator(raw: ApiCreator, index: number): Creator {
-  const validPlatforms = ["Teachable", "Kajabi", "Thinkific", "Podia", "LearnWorlds", "kurser.se", "utbildning.se"] as const;
+  const validPlatforms = [
+    "Teachable",
+    "Kajabi",
+    "Thinkific",
+    "Podia",
+    "LearnWorlds",
+    "kurser.se",
+    "utbildning.se",
+  ] as const;
   const rawPlatform = raw.platform ?? "Annat";
   const platform = (validPlatforms as readonly string[]).includes(rawPlatform)
     ? (rawPlatform as Creator["platform"])

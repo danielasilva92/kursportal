@@ -11,8 +11,11 @@ const JUNK_NAME_PATTERNS = [
   /^(hem|home|start|index|kurs|kurser|utbildning|utbildningar|om oss|kontakt|page \d+)$/i,
   /^(online courses?|all courses?|course catalog|browse courses?)$/i,
   /^-?\s*den kompletta guiden$/i,
-  /^(hem|home)$/i,/^(kursen)$/i,/^(webbkurs|onlinekurs|kurs)$/i,/^(kursen)$/i,
-/^(webbkurs|onlinekurs|kurs)$/i,
+  /^(hem|home)$/i,
+  /^(kursen)$/i,
+  /^(webbkurs|onlinekurs|kurs)$/i,
+  /^(kursen)$/i,
+  /^(webbkurs|onlinekurs|kurs)$/i,
 ];
 
 function isAggregatorPage(title = "", url = "") {
@@ -23,7 +26,9 @@ function isAggregatorPage(title = "", url = "") {
 }
 
 function isJunkName(name = "") {
-  return JUNK_NAME_PATTERNS.some((p) => p.test(name.trim())) || name.length < 3 || name.length > 100;
+  return (
+    JUNK_NAME_PATTERNS.some((p) => p.test(name.trim())) || name.length < 3 || name.length > 100
+  );
 }
 
 function extractCreatorNameFromUrl(url = "") {
@@ -33,10 +38,13 @@ function extractCreatorNameFromUrl(url = "") {
 
     if (parts.length >= 3) {
       const subdomain = parts[0];
-      if (subdomain.length > 2 && subdomain !== "app" && subdomain !== "cdn" && subdomain !== "assets") {
-        return subdomain
-          .replace(/[-_]/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase());
+      if (
+        subdomain.length > 2 &&
+        subdomain !== "app" &&
+        subdomain !== "cdn" &&
+        subdomain !== "assets"
+      ) {
+        return subdomain.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
       }
     }
 
@@ -102,9 +110,7 @@ function extractCourseCount(markdown = "") {
   }
 
   const headingMatches = markdown.match(/^#{1,3}\s+.+$/gm) || [];
-  const courseHeadings = headingMatches.filter((h) =>
-    /(kurs|course|program|utbildning)/i.test(h)
-  );
+  const courseHeadings = headingMatches.filter((h) => /(kurs|course|program|utbildning)/i.test(h));
   if (courseHeadings.length > 1) return courseHeadings.length;
 
   return null;
@@ -144,7 +150,16 @@ function estimateReach(followerCount, socials = []) {
   return "Okänd";
 }
 
-function calculateLeadScore({ emails, prices, socials, likelySwedish, courseCount, followerCount, platform, isAggregator  }) {
+function calculateLeadScore({
+  emails,
+  prices,
+  socials,
+  likelySwedish,
+  courseCount,
+  followerCount,
+  platform,
+  isAggregator,
+}) {
   let score = 0;
 
   if (likelySwedish) score += 3;
@@ -153,7 +168,8 @@ function calculateLeadScore({ emails, prices, socials, likelySwedish, courseCoun
   if (courseCount !== null) score += 1;
   if (socials.length > 0) score += 1;
   if (followerCount !== null && followerCount >= 1000) score += 2;
-  if (platform !== "Unknown" && platform !== "kurser.se" && platform !== "utbildning.se") score += 1;
+  if (platform !== "Unknown" && platform !== "kurser.se" && platform !== "utbildning.se")
+    score += 1;
   if (isAggregator) score -= 2;
 
   return score;
@@ -187,7 +203,10 @@ function splitTitleParts(title = "") {
     };
   }
 
-  const parts = title.split("|").map((part) => part.trim()).filter(Boolean);
+  const parts = title
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean);
 
   return {
     left: parts[0] || "",
@@ -219,21 +238,28 @@ export function extractCreatorData({ url, markdown, metadata }) {
   const description = metadata.description || "";
   const combinedText = `${title}\n${description}\n${markdown}`.trim();
 
-const cleanUrl = canonicalizeUrl(url);
+  const cleanUrl = canonicalizeUrl(url);
   const platform = detectPlatform(cleanUrl);
-const isAggregator = isAggregatorPage(title, cleanUrl);
+  const isAggregator = isAggregatorPage(title, cleanUrl);
 
   const emails = extractEmails(combinedText);
   const prices = extractPrices(combinedText);
   const socials = extractSocials(combinedText);
   const likelySwedish = isSwedish(combinedText, cleanUrl);
-const creatorName = getBestCreatorName(metadata, markdown, cleanUrl);
-const courseName = getBestCourseName(metadata, markdown);
-const courseCount = extractCourseCount(markdown);
+  const creatorName = getBestCreatorName(metadata, markdown, cleanUrl);
+  const courseName = getBestCourseName(metadata, markdown);
+  const courseCount = extractCourseCount(markdown);
   const followerCount = extractFollowerCount(combinedText);
 
   const leadScore = calculateLeadScore({
-    emails, prices, socials, likelySwedish, courseCount, followerCount, platform, isAggregator,
+    emails,
+    prices,
+    socials,
+    likelySwedish,
+    courseCount,
+    followerCount,
+    platform,
+    isAggregator,
   });
 
   return {

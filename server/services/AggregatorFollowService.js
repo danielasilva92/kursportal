@@ -29,12 +29,14 @@ async function bingSearch(query) {
 
     $("a[href]").each((_, el) => {
       const href = $(el).attr("href") || "";
-      if (href.startsWith("http") && !href.includes("bing.com") && !href.includes("microsoft.com")) {
+      if (
+        href.startsWith("http") &&
+        !href.includes("bing.com") &&
+        !href.includes("microsoft.com")
+      ) {
         try {
           found.push(normalizeUrl(href));
-        } catch {
-          
-        }
+        } catch {}
       }
     });
 

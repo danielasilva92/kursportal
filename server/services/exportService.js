@@ -1,7 +1,20 @@
 const FIELDS = [
-  "creatorName", "platform", "courseUrl", "subject", "courseCount",
-  "pricing", "website", "emails", "socials", "estimatedReach",
-  "dataSource", "language", "title", "description", "likelySwedish", "leadScore",
+  "creatorName",
+  "platform",
+  "courseUrl",
+  "subject",
+  "courseCount",
+  "pricing",
+  "website",
+  "emails",
+  "socials",
+  "estimatedReach",
+  "dataSource",
+  "language",
+  "title",
+  "description",
+  "likelySwedish",
+  "leadScore",
 ];
 
 function escapeCsvField(value) {
@@ -19,7 +32,7 @@ function flatten(creator) {
     courseUrl: creator.courseUrl || "",
     subject: creator.subject || "",
     courseCount: creator.courseCount ?? "",
-    pricing: Array.isArray(creator.pricing) ? creator.pricing.join(" | ") : (creator.pricing || ""),
+    pricing: Array.isArray(creator.pricing) ? creator.pricing.join(" | ") : creator.pricing || "",
     website: creator.contact?.website || "",
     emails: (creator.contact?.emails || []).join(" | "),
     socials: (creator.contact?.socials || []).join(" | "),

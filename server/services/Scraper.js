@@ -6,8 +6,7 @@ const BROWSER_HEADERS = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.8",
-  Accept:
-    "text/html,application/xhtml+xml,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  Accept: "text/html,application/xhtml+xml,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 };
 
 function parseHtml(url, html) {
@@ -16,9 +15,7 @@ function parseHtml(url, html) {
   $("script, style, noscript, iframe, svg").remove();
 
   const title =
-    $("title").first().text().trim() ||
-    $('meta[property="og:title"]').attr("content") ||
-    "";
+    $("title").first().text().trim() || $('meta[property="og:title"]').attr("content") || "";
 
   const description =
     $('meta[name="description"]').attr("content") ||
@@ -26,9 +23,7 @@ function parseHtml(url, html) {
     "";
 
   const language =
-    $("html").attr("lang") ||
-    $('meta[http-equiv="content-language"]').attr("content") ||
-    "";
+    $("html").attr("lang") || $('meta[http-equiv="content-language"]').attr("content") || "";
 
   const blocks = [];
   $("h1, h2, h3, p, li, td, th, span, div").each((_, el) => {
@@ -50,8 +45,7 @@ function parseHtml(url, html) {
     }
   });
 
-  const markdown =
-    [...new Set(blocks)].join("\n") + "\n" + [...new Set(links)].join("\n");
+  const markdown = [...new Set(blocks)].join("\n") + "\n" + [...new Set(links)].join("\n");
 
   return {
     markdown,

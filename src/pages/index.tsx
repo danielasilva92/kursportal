@@ -58,7 +58,9 @@ const Index = () => {
   const platforms = useMemo(() => [...new Set(creators.map((c) => c.platform))], [creators]);
   const platformBreakdown = useMemo(() => {
     const map: Record<string, number> = {};
-    creators.forEach((c) => { map[c.platform] = (map[c.platform] || 0) + 1; });
+    creators.forEach((c) => {
+      map[c.platform] = (map[c.platform] || 0) + 1;
+    });
     return map;
   }, [creators]);
 
@@ -127,7 +129,8 @@ const Index = () => {
             transition={{ delay: 0.16, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="text-primary-foreground/70 max-w-lg text-balance"
           >
-            Hitta svenska kurskreatörer på internationella plattformar och konvertera dem till Kursportal-kunder.
+            Hitta svenska kurskreatörer på internationella plattformar och konvertera dem till
+            Kursportal-kunder.
           </motion.p>
         </motion.div>
       </motion.header>
@@ -170,7 +173,9 @@ const Index = () => {
                 >
                   <option value="all">Alla plattformar</option>
                   {platforms.map((p) => (
-                    <option key={p} value={p}>{p}</option>
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
                   ))}
                 </select>
 

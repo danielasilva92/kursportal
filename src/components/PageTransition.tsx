@@ -9,9 +9,7 @@ const pageVariants: Variants = {
 };
 
 const PageTransition = ({ children }: { children: ReactNode }) => (
-  <motion.div variants={pageVariants}>
-    {children}
-  </motion.div>
+  <motion.div variants={pageVariants}>{children}</motion.div>
 );
 
 export default PageTransition;

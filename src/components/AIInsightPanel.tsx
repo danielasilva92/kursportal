@@ -68,9 +68,7 @@ export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPane
           <p className="text-sm text-muted-foreground mt-1">
             {creator.platform} • {creator.subject}
           </p>
-          <p className="text-xs text-muted-foreground mt-2 break-all">
-            {creator.url}
-          </p>
+          <p className="text-xs text-muted-foreground mt-2 break-all">{creator.url}</p>
         </div>
       </div>
 
@@ -103,9 +101,7 @@ export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPane
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-background/70 p-3">
               <p className="text-xs text-muted-foreground">Svensk marknad</p>
-              <p className="text-lg font-semibold">
-                {analysis.swedishMarketScore}%
-              </p>
+              <p className="text-lg font-semibold">{analysis.swedishMarketScore}%</p>
             </div>
             <div className="rounded-xl border border-border bg-background/70 p-3">
               <p className="text-xs text-muted-foreground">Confidence</p>
@@ -139,9 +135,7 @@ export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPane
               <Target className="w-4 h-4 text-mauve" />
               <p className="font-medium">Outreach-vinkel</p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {analysis.outreachAngle}
-            </p>
+            <p className="text-sm text-muted-foreground">{analysis.outreachAngle}</p>
           </section>
 
           <section className="rounded-xl border border-border bg-background/70 p-4">
@@ -149,9 +143,7 @@ export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPane
               <Database className="w-4 h-4 text-mauve" />
               <p className="font-medium">Kategori</p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {analysis.suggestedCategory}
-            </p>
+            <p className="text-sm text-muted-foreground">{analysis.suggestedCategory}</p>
           </section>
 
           <section className="rounded-xl border border-border bg-background/70 p-4">
@@ -171,18 +163,14 @@ export default function AIInsightPanel({ creator, onNotesChange }: AIInsightPane
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                Inga tydliga luckor identifierades.
-              </p>
+              <p className="text-sm text-muted-foreground">Inga tydliga luckor identifierades.</p>
             )}
           </section>
 
           {analysis.reasoningBrief && (
             <section className="rounded-xl border border-border bg-background/70 p-4">
               <p className="font-medium mb-2">Kort motivering</p>
-              <p className="text-sm text-muted-foreground">
-                {analysis.reasoningBrief}
-              </p>
+              <p className="text-sm text-muted-foreground">{analysis.reasoningBrief}</p>
             </section>
           )}
         </div>

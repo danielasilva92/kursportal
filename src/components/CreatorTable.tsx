@@ -31,19 +31,34 @@ interface CreatorTableProps {
 const statusConfig: Record<Creator["status"], { label: string; className: string }> = {
   ny: { label: "Ny", className: "bg-amber-50 text-amber-700 border border-amber-200" },
   kontaktad: { label: "Kontaktad", className: "bg-blue-50 text-blue-700 border border-blue-200" },
-  intresserad: { label: "Intresserad", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  ej_intresserad: { label: "Ej intresserad", className: "bg-neutral-100 text-neutral-500 border border-neutral-200" },
+  intresserad: {
+    label: "Intresserad",
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  },
+  ej_intresserad: {
+    label: "Ej intresserad",
+    className: "bg-neutral-100 text-neutral-500 border border-neutral-200",
+  },
 };
 
 const platformConfig: Record<string, { dot: string; badge: string }> = {
-  Teachable: { dot: "bg-violet-400", badge: "bg-violet-50 text-violet-700 border border-violet-200" },
+  Teachable: {
+    dot: "bg-violet-400",
+    badge: "bg-violet-50 text-violet-700 border border-violet-200",
+  },
   Kajabi: { dot: "bg-orange-400", badge: "bg-orange-50 text-orange-700 border border-orange-200" },
   Thinkific: { dot: "bg-sky-400", badge: "bg-sky-50 text-sky-700 border border-sky-200" },
   Podia: { dot: "bg-teal-400", badge: "bg-teal-50 text-teal-700 border border-teal-200" },
   LearnWorlds: { dot: "bg-rose-400", badge: "bg-rose-50 text-rose-700 border border-rose-200" },
-  "kurser.se": { dot: "bg-emerald-400", badge: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  "kurser.se": {
+    dot: "bg-emerald-400",
+    badge: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  },
   "utbildning.se": { dot: "bg-cyan-400", badge: "bg-cyan-50 text-cyan-700 border border-cyan-200" },
-  Annat: { dot: "bg-neutral-300", badge: "bg-neutral-50 text-neutral-600 border border-neutral-200" },
+  Annat: {
+    dot: "bg-neutral-300",
+    badge: "bg-neutral-50 text-neutral-600 border border-neutral-200",
+  },
 };
 
 const reachConfig: Record<string, string> = {
@@ -128,11 +143,21 @@ function ContactIcons({ creator }: { creator: Creator }) {
   );
 }
 
-function SortIcon({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey | null; sortDir: SortDir }) {
+function SortIcon({
+  column,
+  sortKey,
+  sortDir,
+}: {
+  column: SortKey;
+  sortKey: SortKey | null;
+  sortDir: SortDir;
+}) {
   if (sortKey !== column) return <ChevronsUpDown className="w-3 h-3 opacity-30" />;
-  return sortDir === "asc"
-    ? <ChevronUp className="w-3 h-3 text-mauve" />
-    : <ChevronDown className="w-3 h-3 text-mauve" />;
+  return sortDir === "asc" ? (
+    <ChevronUp className="w-3 h-3 text-mauve" />
+  ) : (
+    <ChevronDown className="w-3 h-3 text-mauve" />
+  );
 }
 
 const CreatorTable = ({
@@ -163,11 +188,22 @@ const CreatorTable = ({
     return [...creators].sort((a, b) => {
       let av: string | number = "";
       let bv: string | number = "";
-      if (sortKey === "name") { av = a.name; bv = b.name; }
-      else if (sortKey === "platform") { av = a.platform; bv = b.platform; }
-      else if (sortKey === "subject") { av = a.subject; bv = b.subject; }
-      else if (sortKey === "status") { av = a.status; bv = b.status; }
-      else if (sortKey === "leadScore") { av = a.leadScore ?? 0; bv = b.leadScore ?? 0; }
+      if (sortKey === "name") {
+        av = a.name;
+        bv = b.name;
+      } else if (sortKey === "platform") {
+        av = a.platform;
+        bv = b.platform;
+      } else if (sortKey === "subject") {
+        av = a.subject;
+        bv = b.subject;
+      } else if (sortKey === "status") {
+        av = a.status;
+        bv = b.status;
+      } else if (sortKey === "leadScore") {
+        av = a.leadScore ?? 0;
+        bv = b.leadScore ?? 0;
+      }
 
       if (typeof av === "number" && typeof bv === "number") {
         return sortDir === "asc" ? av - bv : bv - av;
@@ -248,7 +284,9 @@ const CreatorTable = ({
                   <input
                     type="checkbox"
                     checked={allSelected}
-                    ref={(el) => { if (el) el.indeterminate = someSelected && !allSelected; }}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected && !allSelected;
+                    }}
                     onChange={toggleAll}
                     className="w-3.5 h-3.5 rounded accent-mauve cursor-pointer"
                   />
@@ -256,10 +294,18 @@ const CreatorTable = ({
                 <SortableTh label="Kreatör" col="name" />
                 <SortableTh label="Plattform" col="platform" />
                 <SortableTh label="Ämne" col="subject" />
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">Kurser</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">Prissättning</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">Kontakt</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">Räckvidd</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                  Kurser
+                </th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                  Prissättning
+                </th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                  Kontakt
+                </th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                  Räckvidd
+                </th>
                 <SortableTh label="Status" col="status" />
                 <SortableTh label="Score" col="leadScore" />
               </tr>
@@ -286,7 +332,11 @@ const CreatorTable = ({
                       transition={{ delay: idx * 0.03, duration: 0.25, ease: "easeOut" }}
                       onClick={() => onSelectCreator?.(creator)}
                       className={`border-b border-border/30 hover:bg-muted/20 transition-colors duration-150 group cursor-pointer ${
-                        selectedCreatorId === creator.id ? "bg-mauve/10" : isSelected ? "bg-mauve/5" : ""
+                        selectedCreatorId === creator.id
+                          ? "bg-mauve/10"
+                          : isSelected
+                            ? "bg-mauve/5"
+                            : ""
                       }`}
                     >
                       <td className="px-4 py-3.5" onClick={(e) => toggleOne(creator.id, e)}>
@@ -301,9 +351,13 @@ const CreatorTable = ({
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-2.5">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-foreground leading-tight">{creator.name}</span>
+                            <span className="font-semibold text-foreground leading-tight">
+                              {creator.name}
+                            </span>
                             {creator.company && (
-                              <span className="text-xs text-muted-foreground mt-0.5">{creator.company}</span>
+                              <span className="text-xs text-muted-foreground mt-0.5">
+                                {creator.company}
+                              </span>
                             )}
                           </div>
                           <a
@@ -319,17 +373,23 @@ const CreatorTable = ({
                       </td>
 
                       <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${platform.badge}`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${platform.badge}`}
+                        >
                           <span className={`w-1.5 h-1.5 rounded-full ${platform.dot}`} />
                           {creator.platform}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3.5 text-muted-foreground text-sm">{creator.subject}</td>
+                      <td className="px-4 py-3.5 text-muted-foreground text-sm">
+                        {creator.subject}
+                      </td>
 
                       <td className="px-4 py-3.5 tabular-nums text-center">
                         {creator.courseCount != null ? (
-                          <span className="font-semibold text-foreground">{creator.courseCount}</span>
+                          <span className="font-semibold text-foreground">
+                            {creator.courseCount}
+                          </span>
                         ) : (
                           <span className="text-muted-foreground/40 text-base">—</span>
                         )}
@@ -343,7 +403,10 @@ const CreatorTable = ({
                           >
                             {creator.pricing.split(" | ")[0]}
                             {creator.pricing.includes(" | ") && (
-                              <span className="text-muted-foreground font-normal"> +{creator.pricing.split(" | ").length - 1}</span>
+                              <span className="text-muted-foreground font-normal">
+                                {" "}
+                                +{creator.pricing.split(" | ").length - 1}
+                              </span>
                             )}
                           </span>
                         ) : (
@@ -357,7 +420,9 @@ const CreatorTable = ({
 
                       <td className="px-4 py-3.5">
                         {creator.estimatedReach ? (
-                          <span className={`text-xs font-medium ${reachConfig[creator.estimatedReach] ?? "text-muted-foreground"}`}>
+                          <span
+                            className={`text-xs font-medium ${reachConfig[creator.estimatedReach] ?? "text-muted-foreground"}`}
+                          >
                             {creator.estimatedReach}
                           </span>
                         ) : (
@@ -368,19 +433,25 @@ const CreatorTable = ({
                       <td className="px-4 py-3.5">
                         <select
                           value={creator.status}
-                          onChange={(e) => onStatusChange(creator.id, e.target.value as Creator["status"])}
+                          onChange={(e) =>
+                            onStatusChange(creator.id, e.target.value as Creator["status"])
+                          }
                           onClick={(e) => e.stopPropagation()}
                           className={`text-xs rounded-full px-2.5 py-1 border outline-none cursor-pointer font-medium transition-colors ${status.className}`}
                         >
                           {Object.entries(statusConfig).map(([val, cfg]) => (
-                            <option key={val} value={val}>{cfg.label}</option>
+                            <option key={val} value={val}>
+                              {cfg.label}
+                            </option>
                           ))}
                         </select>
                       </td>
 
                       <td className="px-4 py-3.5">
                         {creator.leadScore != null ? (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border tabular-nums ${scoreColor(creator.leadScore)}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border tabular-nums ${scoreColor(creator.leadScore)}`}
+                          >
                             {creator.leadScore}
                           </span>
                         ) : (
@@ -393,7 +464,10 @@ const CreatorTable = ({
 
                 {pageCreators.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="px-4 py-16 text-center text-muted-foreground text-sm">
+                    <td
+                      colSpan={10}
+                      className="px-4 py-16 text-center text-muted-foreground text-sm"
+                    >
                       Inga kreatörer matchar sökningen
                     </td>
                   </tr>
@@ -412,7 +486,8 @@ const CreatorTable = ({
           className="flex items-center justify-between px-1"
         >
           <p className="text-xs text-muted-foreground">
-            Visar {(safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, sorted.length)} av {sorted.length} kreatörer
+            Visar {(safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, sorted.length)} av{" "}
+            {sorted.length} kreatörer
           </p>
 
           <div className="flex items-center gap-1">
@@ -426,7 +501,12 @@ const CreatorTable = ({
 
             {pageNumbers().map((p, i) =>
               p === "..." ? (
-                <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-muted-foreground text-xs">…</span>
+                <span
+                  key={`ellipsis-${i}`}
+                  className="w-8 h-8 flex items-center justify-center text-muted-foreground text-xs"
+                >
+                  …
+                </span>
               ) : (
                 <button
                   key={p}

@@ -28,6 +28,10 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
 
   const prevJobsRef = useRef<BatchJob[]>([]);
 
+  const isIOS = /iphone|ipad|ipod/i.test(
+    typeof navigator !== "undefined" ? navigator.userAgent : ""
+  );
+
   useEffect(() => {
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       Notification.requestPermission();
@@ -75,8 +79,15 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
           completedAt: new Date().toISOString(),
         });
         if (found.length > 0) onCreatorsFound(found);
-      } catch {
-        updateJob(jobId, { status: "failed", progress: 0 });
+      } catch (err: unknown) {
+        const isAbort = err instanceof Error && err.name === "AbortError";
+        updateJob(jobId, {
+          status: "failed",
+          progress: 0,
+          error: isAbort
+            ? "Sökningen tog för lång tid. Håll skärmen aktiv och försök igen."
+            : undefined,
+        });
       }
     },
     [onCreatorsFound, updateJob]
@@ -181,7 +192,9 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
 
   const runAll = () => {
     setIsRunningAll(true);
-    const autoTemplates = batchTemplates.filter((t) => t.type !== "manual_import" && t.type !== "dns_lookup");
+    const autoTemplates = batchTemplates.filter(
+      (t) => t.type !== "manual_import" && t.type !== "dns_lookup"
+    );
     autoTemplates.forEach((t, i) => {
       setTimeout(() => startJob(t), i * 800);
     });
@@ -216,6 +229,11 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
       transition={{ delay: 0.15, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="glass-card rounded-lg p-6"
     >
+      {isIOS && (
+        <div className="mb-4 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+          Håll skärmen aktiv under sökningen — iOS pausar annars nätverksanrop.
+        </div>
+      )}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
           <motion.div
@@ -294,7 +312,9 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
                       <textarea
                         className="w-full text-xs rounded-md border border-border bg-background p-2 resize-none focus:outline-none focus:ring-2 focus:ring-ring/30"
                         rows={4}
-                        placeholder={"En URL per rad\nhttps://kreativ.teachable.com\nhttps://marknadsfor.kajabi.com"}
+                        placeholder={
+                          "En URL per rad\nhttps://kreativ.teachable.com\nhttps://marknadsfor.kajabi.com"
+                        }
                         value={manualUrls}
                         onChange={(e) => setManualUrls(e.target.value)}
                       />
@@ -332,10 +352,10 @@ const BatchPanel = ({ onCreatorsFound }: BatchPanelProps) => {
                         animate={{ scale: 1, opacity: 1 }}
                       >
                         {activeJob.status === "failed"
-                          ? "Misslyckades"
+                          ? (activeJob.error ?? "Misslyckades")
                           : activeJob.status === "running"
-                          ? "Hämtar..."
-                          : `${activeJob.foundItems} hittade`}
+                            ? "Hämtar..."
+                            : `${activeJob.foundItems} hittade`}
                       </motion.span>
                     </motion.div>
                   )}

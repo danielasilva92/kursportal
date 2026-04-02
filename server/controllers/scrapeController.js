@@ -80,7 +80,8 @@ export async function findCreators(req, res) {
 
     for (const url of urls) {
       const check = validateUrl(url);
-      if (!check.ok) return res.status(400).json({ error: `Ogiltig URL "${url}": ${check.message}` });
+      if (!check.ok)
+        return res.status(400).json({ error: `Ogiltig URL "${url}": ${check.message}` });
     }
 
     const results = await findCreatorsFromUrls(urls);

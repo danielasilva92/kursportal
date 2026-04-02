@@ -9,13 +9,7 @@ const PLATFORM_DOMAINS = [
   "learnworlds.com",
 ];
 
-const SEARCH_TERMS = [
-  "onlinekurs",
-  "distanskurs",
-  "utbildning online",
-  "lär dig",
-  "kurspaket",
-];
+const SEARCH_TERMS = ["onlinekurs", "distanskurs", "utbildning online", "lär dig", "kurspaket"];
 
 function extractCreatorUrls(ads = []) {
   const urls = new Set();
@@ -30,9 +24,7 @@ function extractCreatorUrls(ads = []) {
       if (!link) continue;
       try {
         const { hostname } = new URL(link);
-        const usesPlatform = PLATFORM_DOMAINS.some((d) =>
-          hostname.includes(d)
-        );
+        const usesPlatform = PLATFORM_DOMAINS.some((d) => hostname.includes(d));
         if (usesPlatform) {
           urls.add(link);
         }
@@ -53,20 +45,17 @@ export async function discoverViaFacebookAds() {
 
   for (const term of SEARCH_TERMS) {
     try {
-      const response = await axios.get(
-        "https://graph.facebook.com/v19.0/ads_archive",
-        {
-          params: {
-            access_token: token,
-            ad_type: "ALL",
-            ad_reached_countries: "SE",
-            search_terms: term,
-            fields: "snapshot{link_url,cards{link_url}}",
-            limit: 50,
-          },
-          timeout: 10000,
-        }
-      );
+      const response = await axios.get("https://graph.facebook.com/v19.0/ads_archive", {
+        params: {
+          access_token: token,
+          ad_type: "ALL",
+          ad_reached_countries: "SE",
+          search_terms: term,
+          fields: "snapshot{link_url,cards{link_url}}",
+          limit: 50,
+        },
+        timeout: 10000,
+      });
 
       const ads = response.data?.data || [];
       extractCreatorUrls(ads).forEach((url) => found.add(url));

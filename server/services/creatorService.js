@@ -16,7 +16,6 @@ const AGGREGATOR_SEEDS = [
   "https://www.utbildning.se/kurser/distansutbildningar",
 ];
 
-
 const KNOWN_CREATOR_SEEDS = [];
 
 const AGGREGATOR_BLOCKED_HOSTS = [
@@ -87,11 +86,25 @@ export async function scrapeAndBuildCreator(url) {
 function isJunkPage(creator) {
   const t = (creator.title || "").toLowerCase();
   const junkTitles = [
-    "404", "page not found", "doesn't exist", "not found",
-    "inloggning", "logga in", "sign in", "log in", "login",
-    "access denied", "forbidden", "unauthorized", "403",
-    "coming soon", "under construction", "maintenance",
-    "error", "oops", "något gick fel",
+    "404",
+    "page not found",
+    "doesn't exist",
+    "not found",
+    "inloggning",
+    "logga in",
+    "sign in",
+    "log in",
+    "login",
+    "access denied",
+    "forbidden",
+    "unauthorized",
+    "403",
+    "coming soon",
+    "under construction",
+    "maintenance",
+    "error",
+    "oops",
+    "något gick fel",
   ];
   return junkTitles.some((s) => t.includes(s));
 }
@@ -110,9 +123,9 @@ export async function findCreatorsFromUrls(urls) {
   const seen = new Set();
   const CONCURRENCY = 3;
 
-  const dedupedUrls = [...new Set(
-    urls.map(normalizeUrl).filter((u) => u && !isAggregatorOwnPage(u))
-  )];
+  const dedupedUrls = [
+    ...new Set(urls.map(normalizeUrl).filter((u) => u && !isAggregatorOwnPage(u))),
+  ];
 
   for (let i = 0; i < dedupedUrls.length; i += CONCURRENCY) {
     const batch = dedupedUrls.slice(i, i + CONCURRENCY).filter((u) => !seen.has(u));

@@ -1,15 +1,26 @@
 import axios from "axios";
 import { normalizeUrl, isPlatformCreatorUrl } from "../utils/Platform.js";
 
-const PLATFORM_PATTERNS = [
-  "*.teachable.com",
-  "*.mykajabi.com",
-];
+const PLATFORM_PATTERNS = ["*.teachable.com", "*.mykajabi.com"];
 
 const IGNORED_SUBDOMAINS = [
-  "www", "app", "cdn", "assets", "api", "blog", "support",
-  "help", "community", "affiliates", "partners", "press",
-  "marketing", "mail", "smtp", "cpanel", "admin",
+  "www",
+  "app",
+  "cdn",
+  "assets",
+  "api",
+  "blog",
+  "support",
+  "help",
+  "community",
+  "affiliates",
+  "partners",
+  "press",
+  "marketing",
+  "mail",
+  "smtp",
+  "cpanel",
+  "admin",
 ];
 
 function extractSubdomainBase(url = "") {

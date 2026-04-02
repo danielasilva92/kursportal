@@ -33,7 +33,8 @@ export function buildCreator(url, markdown, metadata) {
   if (courseCount !== null) leadScore += 1;
   if (socials.length > 0) leadScore += 1;
   if (followerCount !== null && followerCount >= 1000) leadScore += 2;
-  if (platform !== "Annat" && platform !== "kurser.se" && platform !== "utbildning.se") leadScore += 1;
+  if (platform !== "Annat" && platform !== "kurser.se" && platform !== "utbildning.se")
+    leadScore += 1;
 
   return {
     creatorName,

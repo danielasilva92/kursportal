@@ -10,10 +10,19 @@ function isJunkName(name = "") {
 }
 
 const PLATFORM_SUFFIXES = [
-  " | Teachable", " - Teachable", " | Kajabi", " - Kajabi",
-  " | Thinkific", " - Thinkific", " | Podia", " - Podia",
-  " | LearnWorlds", " - LearnWorlds", " | Online Courses",
-  " | Courses", " - Online Course",
+  " | Teachable",
+  " - Teachable",
+  " | Kajabi",
+  " - Kajabi",
+  " | Thinkific",
+  " - Thinkific",
+  " | Podia",
+  " - Podia",
+  " | LearnWorlds",
+  " - LearnWorlds",
+  " | Online Courses",
+  " | Courses",
+  " - Online Course",
 ];
 
 function cleanTitle(title = "") {
@@ -129,9 +138,7 @@ export function extractCourseCount(text = "") {
   }
 
   const headings = text.match(/^#{1,3}\s+.+$/gm) || [];
-  const courseHeadings = headings.filter((h) =>
-    /(kurs|course|program|utbildning)/i.test(h)
-  );
+  const courseHeadings = headings.filter((h) => /(kurs|course|program|utbildning)/i.test(h));
   if (courseHeadings.length > 1) return courseHeadings.length;
 
   return null;
@@ -161,19 +168,124 @@ export function extractFollowerCount(text = "") {
 }
 
 const CATEGORIES = [
-  { label: "Design & UX", keywords: ["ux", "ui design", "grafisk design", "figma", "photoshop", "webbdesign", "graphic design"] },
-  { label: "Marknadsföring", keywords: ["seo", "marknadsföring", "content marketing", "sociala medier", "google ads", "digital marketing"] },
-  { label: "Fotografi", keywords: ["fotografi", "fotografering", "lightroom", "kamera", "photography"] },
-  { label: "Ledarskap", keywords: ["ledarskap", "ledare", "chef", "management", "teamledning", "human resources"] },
-  { label: "Programmering", keywords: ["programmering", "kod", "python", "javascript", "react", "webbutveckling", "coding", "software"] },
-  { label: "Hälsa & Träning", keywords: ["hälsa", "träning", "yoga", "fitness", "kost", "nutrition", "mindfulness", "meditation", "pilates"] },
-  { label: "Ekonomi", keywords: ["ekonomi", "bokföring", "redovisning", "aktier", "sparande", "investeringar", "budget"] },
-  { label: "Musik", keywords: ["musik", "gitarr", "piano", "sång", "musikproduktion", "låtskrivning"] },
-  { label: "Språk", keywords: ["engelska", "spanska", "franska", "tyska", "arabiska", "kinesiska", "språkkurs", "language"] },
-  { label: "Business", keywords: ["business", "entreprenör", "företagande", "startup", "försäljning", "ehandel", "affärsutveckling"] },
-  { label: "Coaching", keywords: ["coaching", "coach", "livscoach", "personlig utveckling", "självledarskap", "mindset"] },
-  { label: "Mat & Bakning", keywords: ["bakning", "matlagning", "kock", "konditori", "cooking", "baking"] },
-  { label: "Produktivitet", keywords: ["excel", "office", "produktivitet", "tidshantering", "notion", "projektledning"] },
+  {
+    label: "Design & UX",
+    keywords: [
+      "ux",
+      "ui design",
+      "grafisk design",
+      "figma",
+      "photoshop",
+      "webbdesign",
+      "graphic design",
+    ],
+  },
+  {
+    label: "Marknadsföring",
+    keywords: [
+      "seo",
+      "marknadsföring",
+      "content marketing",
+      "sociala medier",
+      "google ads",
+      "digital marketing",
+    ],
+  },
+  {
+    label: "Fotografi",
+    keywords: ["fotografi", "fotografering", "lightroom", "kamera", "photography"],
+  },
+  {
+    label: "Ledarskap",
+    keywords: ["ledarskap", "ledare", "chef", "management", "teamledning", "human resources"],
+  },
+  {
+    label: "Programmering",
+    keywords: [
+      "programmering",
+      "kod",
+      "python",
+      "javascript",
+      "react",
+      "webbutveckling",
+      "coding",
+      "software",
+    ],
+  },
+  {
+    label: "Hälsa & Träning",
+    keywords: [
+      "hälsa",
+      "träning",
+      "yoga",
+      "fitness",
+      "kost",
+      "nutrition",
+      "mindfulness",
+      "meditation",
+      "pilates",
+    ],
+  },
+  {
+    label: "Ekonomi",
+    keywords: [
+      "ekonomi",
+      "bokföring",
+      "redovisning",
+      "aktier",
+      "sparande",
+      "investeringar",
+      "budget",
+    ],
+  },
+  {
+    label: "Musik",
+    keywords: ["musik", "gitarr", "piano", "sång", "musikproduktion", "låtskrivning"],
+  },
+  {
+    label: "Språk",
+    keywords: [
+      "engelska",
+      "spanska",
+      "franska",
+      "tyska",
+      "arabiska",
+      "kinesiska",
+      "språkkurs",
+      "language",
+    ],
+  },
+  {
+    label: "Business",
+    keywords: [
+      "business",
+      "entreprenör",
+      "företagande",
+      "startup",
+      "försäljning",
+      "ehandel",
+      "affärsutveckling",
+    ],
+  },
+  {
+    label: "Coaching",
+    keywords: [
+      "coaching",
+      "coach",
+      "livscoach",
+      "personlig utveckling",
+      "självledarskap",
+      "mindset",
+    ],
+  },
+  {
+    label: "Mat & Bakning",
+    keywords: ["bakning", "matlagning", "kock", "konditori", "cooking", "baking"],
+  },
+  {
+    label: "Produktivitet",
+    keywords: ["excel", "office", "produktivitet", "tidshantering", "notion", "projektledning"],
+  },
 ];
 
 export function detectCategory(text = "") {

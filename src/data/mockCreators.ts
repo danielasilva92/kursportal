@@ -18,5 +18,4 @@ export const mockCreators: Creator[] = [
     status: "ny",
     addedAt: "2026-03-18",
   },
- 
 ];
