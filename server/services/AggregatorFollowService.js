@@ -50,9 +50,7 @@ export async function discoverViaAggregatorFollow() {
   for (const query of SERP_QUERIES) {
     const urls = await bingSearch(query);
     urls.forEach((u) => found.add(u));
-    console.log(`[bing-serp] "${query}" → ${urls.length} URLs`);
   }
 
-  console.log(`[bing-serp] totalt: ${found.size} plattforms-URLs hittade`);
   return [...found];
 }

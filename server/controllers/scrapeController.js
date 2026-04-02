@@ -8,6 +8,7 @@ import {
 import { convertCreatorsToCsv } from "../services/exportService.js";
 import { analyzeCreatorWithAI } from "../services/aiAnalysisService.js";
 import { discoverViaWayback } from "../services/WaybackDiscoveryService.js";
+import { discoverViaAggregatorFollow } from "../services/AggregatorFollowService.js";
 
 const BLOCKED_HOSTS = [
   "localhost",
@@ -142,8 +143,11 @@ export async function runPipeline(req, res) {
 export async function runDeepScan(_req, res) {
   console.log("[deep-scan] startar");
   try {
-    const waybackUrls = await discoverViaWayback().catch(() => []);
-    const allUrls = [...new Set(waybackUrls)];
+    const [waybackUrls, aggregatorUrls] = await Promise.all([
+      discoverViaWayback().catch(() => []),
+      discoverViaAggregatorFollow().catch(() => []),
+    ]);
+    const allUrls = [...new Set([...waybackUrls, ...aggregatorUrls])];
     const sample = allUrls.sort(() => Math.random() - 0.5).slice(0, 15);
     const creators = await findCreatorsFromUrls(sample);
     const swedish = creators.filter((c) => c.likelySwedish === true);
